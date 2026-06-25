@@ -117,6 +117,10 @@ function parseExpiry(url) {
     return Math.floor(Date.now() / 1000) + (3 * 60 * 60); 
 }
 
+app.get('/', (req, res) => {
+    res.send('Render API is awake and alive!');
+});
+
 app.get('/api/get-stream', async (req, res) => {
     const channel = req.query.channel;
     
