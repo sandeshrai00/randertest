@@ -27,29 +27,65 @@ async function extractStreamUrl(slug) {
         const page = await browser.newPage();
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36');
         
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(window, 'jwplayer', {
-                get: function() {
-                    return function(id) {
-                        return {
-                            setup: function(config) {
-                                if (config.playlist && config.playlist.length > 0) {
-                                    window.extractedM3U8 = config.playlist[0].file;
-                                }
-                            }
-                        };
-                    };
+        let extractedM3u8 = null;
+
+        // 1. Setup network interception
+        await page.setRequestInterception(true);
+        page.on('request', request => {
+            const reqUrl = request.url();
+            const urlObj = new URL(reqUrl);
+            
+            if (urlObj.pathname.endsWith('.m3u8') && urlObj.hostname.includes('hundredmilesperhour.uk')) {
+                extractedM3u8 = reqUrl;
+            } else if (reqUrl.includes('ping.gif') && reqUrl.includes('mu=')) {
+                const mu = urlObj.searchParams.get('mu');
+                if (mu && mu.includes('.m3u8')) {
+                    extractedM3u8 = decodeURIComponent(mu);
                 }
-            });
+            }
+            request.continue();
         });
-        
-        await page.goto(`https://vileembeds.pages.dev/embed/${slug}`, { waitUntil: 'networkidle2', timeout: 15000 });
-        
-        await page.waitForFunction(() => window.extractedM3U8 !== undefined, { timeout: 10000 });
-        const m3u8 = await page.evaluate(() => window.extractedM3U8);
-        
+
+        // 2. Navigate to dummy wrapper (DaddyLive)
+        const dummyUrl = 'https://dlhd.pk/stream/stream-44.php';
+        let success = false;
+        for(let j = 0; j < 3; j++) {
+            try {
+                await page.goto(dummyUrl, { waitUntil: 'networkidle2', timeout: 15000 });
+                success = true;
+                break;
+            } catch(e) {
+                await new Promise(r => setTimeout(r, 1000));
+            }
+        }
+
+        if (success) {
+            // 3. Inject the vileembeds iframe dynamically
+            await page.evaluate((channelSlug) => {
+                const frames = document.querySelectorAll('iframe');
+                if(frames.length > 0) {
+                    frames[0].src = `https://vileembeds.pages.dev/embed/${channelSlug}`;
+                } else {
+                    const iframe = document.createElement('iframe');
+                    iframe.src = `https://vileembeds.pages.dev/embed/${channelSlug}`;
+                    document.body.appendChild(iframe);
+                }
+            }, slug);
+
+            // 4. Wait up to 20 seconds for the request to be intercepted
+            for(let wait = 0; wait < 20; wait++) {
+                if(extractedM3u8) break;
+                await new Promise(r => setTimeout(r, 1000));
+            }
+        }
+
         await browser.close();
-        return m3u8;
+        
+        if (!extractedM3u8) {
+             throw new Error("Timeout: Failed to intercept m3u8 url within 20 seconds.");
+        }
+        
+        return extractedM3u8;
     } catch (e) {
         console.error(`[-] Extraction failed: ${e.message}`);
         await browser.close();
