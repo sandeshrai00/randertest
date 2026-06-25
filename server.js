@@ -15,6 +15,7 @@ async function extractStreamUrl(slug) {
     console.log(`[+] Launching Puppeteer to extract URL for ${slug}...`);
     const browser = await puppeteer.launch({ 
         headless: 'new',
+        executablePath: '/usr/bin/google-chrome',
         args: [
             '--no-sandbox', 
             '--disable-setuid-sandbox',
