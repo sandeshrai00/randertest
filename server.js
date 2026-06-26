@@ -47,8 +47,12 @@ async function extractStreamUrl(slug) {
             request.continue();
         });
 
-        // 2. Navigate to dummy wrapper (DaddyLive)
-        const dummyUrl = 'https://dlhd.pk/stream/stream-44.php';
+        // 2. Navigate to dummy wrapper (The Disguise)
+        // [FUTURE MAINTENANCE NOTE]: 
+        // 1. If 'timstreams.st' gets aggressive Cloudflare protection, Puppeteer will get stuck here. Change this dummyUrl to any other valid page that doesn't have a captcha.
+        // 2. The embed player URL 'vileembeds.pages.dev' (in step 3 below) is hardcoded. If that gets taken down, update it to their new embed link.
+        // 3. The video server domain 'hundredmilesperhour.uk' (in step 1 above) is hardcoded. If they change their CDN, update the interception logic above.
+        const dummyUrl = 'https://timstreams.st/';
         let success = false;
         for(let j = 0; j < 3; j++) {
             try {

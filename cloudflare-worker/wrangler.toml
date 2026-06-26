@@ -1,0 +1,9 @@
+name = "sorascore-streams-api"
+main = "worker.js"
+compatibility_date = "2024-03-20"
+
+# This connects the Worker to your D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "sorascore_streams"
+# database_id = "We will fill this in after you run the create command!"
