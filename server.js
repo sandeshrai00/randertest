@@ -168,6 +168,33 @@ app.get('/api/get-stream', async (req, res) => {
     }
 });
 
+// --- BACKGROUND AUTO-RENEWAL LOOP ---
+// Runs every 10 minutes (600,000 ms) to proactively refresh active channels.
+setInterval(async () => {
+    const nowUnix = Math.floor(Date.now() / 1000);
+    console.log(`[*] Running background auto-renewal check...`);
+    
+    for (const channel in streamCache) {
+        const cacheData = streamCache[channel];
+        // If the stream expires in less than 30 minutes (1800 seconds), refresh it.
+        if (cacheData.expiresAt - nowUnix < 1800) {
+            console.log(`[*] Background: ${channel} is expiring soon. Generating new URL...`);
+            const newStreamUrl = await extractStreamUrl(channel);
+            
+            if (newStreamUrl) {
+                const newExpiresAt = parseExpiry(newStreamUrl);
+                streamCache[channel] = {
+                    url: newStreamUrl,
+                    expiresAt: newExpiresAt
+                };
+                console.log(`[+] Background: Successfully renewed ${channel} until ${new Date(newExpiresAt * 1000).toLocaleTimeString()}`);
+            } else {
+                console.log(`[-] Background: Failed to renew ${channel}`);
+            }
+        }
+    }
+}, 10 * 60 * 1000);
+
 app.listen(PORT, () => {
     console.log(`🚀 Render Extractor Microservice running on port ${PORT}`);
 });
