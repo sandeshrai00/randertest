@@ -6,4 +6,4 @@ compatibility_date = "2024-03-20"
 [[d1_databases]]
 binding = "DB"
 database_name = "sorascore_streams"
-database_id = "b54229f9-bc96-47f3-bbbf-c4556955c231"
+database_id = "8099a3fc-d7dd-4289-8277-463c6355f350"
