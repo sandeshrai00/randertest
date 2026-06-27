@@ -21,8 +21,21 @@ const CHANNELS = [
 
 function parseExpiry(url) {
     try {
-        const expiresStr = new URL(url).searchParams.get('expires');
-        if (expiresStr) return parseInt(expiresStr);
+        const urlObj = new URL(url);
+        
+        // 1. Try URL parameters (if it uses ?expires=123 or ?exp=123)
+        const expiresParam = urlObj.searchParams.get('expires') || urlObj.searchParams.get('exp');
+        if (expiresParam) return parseInt(expiresParam);
+
+        // 2. Try the new URL format where the timestamp is the first folder: /1782553150/...
+        const pathParts = urlObj.pathname.split('/');
+        if (pathParts.length > 1) {
+            const possibleTimestamp = parseInt(pathParts[1]);
+            // If it's a 10-digit number (valid Unix timestamp in seconds), return it!
+            if (possibleTimestamp > 1700000000 && possibleTimestamp < 2500000000) {
+                return possibleTimestamp;
+            }
+        }
     } catch (e) {}
     // Default fallback: 3 hours from now
     return Math.floor(Date.now() / 1000) + (3 * 60 * 60); 
