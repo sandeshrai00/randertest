@@ -6,14 +6,17 @@ const UPDATE_SECRET = process.env.UPDATE_SECRET;
 
 const CHANNELS = [
     "abc-usa", "accn-usa", "ae-usa", "amc-usa", "ahc-usa", "animalplanet-usa",
-    "axs-usa", "bbc-usa", "bravo-usa", "cbs-usa", "cbssn-usa", "cartoonnetwork-usa",
-    "disneychannel-usa", "disneyjunior-usa", "disneyxd-usa", "espn-usa", "espn2-usa",
-    "espndeportes-usa", "espnews-usa", "espnu-usa", "fox-usa", "fox-sports-1", 
-    "fox-sports-2", "golfchannel-usa", "mtv-usa", "nbc-usa", "nickelodeon-usa", 
-    "nickjr-usa", "nicktoons-usa", "nbc-sports-philly", "nbc-sports-bayarea",
-    "sky-sports-f1", "teenick-usa", "tennischannel-usa", "usanetwork-usa", "tbs-usa",
-    "telemundo-usa", "tnt-usa", "tnt-sports-1", "tnt-sports-2", "tnt-sports-3",
-    "tnt-sports-4", "tycsports-usa", "tudn-usa"
+    "f1-on-apple", "axs-usa", "bbc-usa", "beinsportsmax-sa", "beinsportsmax2-sa",
+    "bravo-usa", "cartoonnetwork-usa", "cbs-usa", "cbssn-usa", "disneychannel-usa",
+    "disneyjunior-usa", "disneyxd-usa", "espn-usa", "espndeportes-usa", "espn2-usa",
+    "espnews-usa", "espnu-usa", "fox-usa", "fox4k-usa", "fox-sports-1", "fox-sports-2",
+    "fox-sports-1-4k", "fusballtv1uhd-de", "fusballtv2uhd-de", "golfchannel-usa",
+    "mtv-usa", "nbc-usa", "nbc-sports-bayarea", "nbc-sports-philly", "nickjr-usa",
+    "nickelodeon-usa", "nicktoons-usa", "sky-sports-cricket", "sky-sports-f1",
+    "sky-sports-f1-uhd", "sony-ten-1", "sony-ten-3", "tbs-usa", "teenick-usa",
+    "telemundo-usa", "tennischannel-usa", "tnt-usa", "tnt-sports-1", "tnt-sports-2",
+    "tnt-sports-3", "tnt-sports-4", "tsn1-ca", "tsn2-ca", "tudn-usa", "tycsports-usa",
+    "usanetwork-usa", "one-fc"
 ];
 
 function parseExpiry(url) {
