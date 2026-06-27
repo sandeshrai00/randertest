@@ -1,14 +1,12 @@
 {
-  "name": "vileembeds-extractor",
+  "name": "sorascore-mega-scraper",
   "version": "1.0.0",
-  "description": "Puppeteer extractor for vileembeds m3u8 streams",
-  "main": "server.js",
+  "description": "GitHub Actions Scraper for SoraScore",
+  "main": "mega-scraper.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node mega-scraper.js"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.18.2",
-    "puppeteer": "^25.2.1"
+    "puppeteer": "^22.0.0"
   }
 }

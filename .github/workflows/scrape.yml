@@ -1,0 +1,32 @@
+name: Mega Scraper
+
+on:
+  # Allows triggering the scraper exactly on time via Uptime Robot Webhook
+  repository_dispatch:
+    types: [trigger-scraper]
+  
+  # Allows you to click a button on GitHub to run it manually
+  workflow_dispatch:
+
+jobs:
+  scrape-and-update:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install Dependencies
+        run: npm install
+        
+      - name: Run Mega Scraper
+        env:
+          WORKER_URL: ${{ secrets.WORKER_URL }}
+          UPDATE_SECRET: ${{ secrets.UPDATE_SECRET }}
+        run: npm start
