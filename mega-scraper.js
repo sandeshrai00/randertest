@@ -32,7 +32,7 @@ function parseExpiry(url) {
         if (pathParts.length > 1) {
             const possibleTimestamp = parseInt(pathParts[1]);
             // If it's a 10-digit number (valid Unix timestamp in seconds), return it!
-            if (possibleTimestamp > 1700000000 && possibleTimestamp < 2500000000) {
+            if (!isNaN(possibleTimestamp) && possibleTimestamp.toString().length === 10) {
                 return possibleTimestamp;
             }
         }
