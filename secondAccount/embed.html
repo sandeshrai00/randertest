@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SoraScore Player</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: #000; overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      -webkit-user-select: none; user-select: none; }
+    #root { position: relative; width: 100%; height: 100%; background: #000; }
+
+    /* video */
+    #v { position: absolute; inset: 0; width: 100%; height: 100%;
+         object-fit: contain; background: #000; }
+
+    /* click shield — catches mouse events above the video */
+    #shield { position: absolute; inset: 0; z-index: 10; cursor: default; }
+
+    /* bottom control bar */
+    #bar { position: absolute; bottom: 0; left: 0; right: 0; z-index: 20;
+           display: flex; align-items: center; justify-content: space-between;
+           padding: 8px 14px; height: 38px;
+           background: rgba(0,0,0,0.88);
+           opacity: 0; transition: opacity 0.25s ease; pointer-events: none; }
+    #bar.show { opacity: 1; pointer-events: auto; }
+
+    .bar-left, .bar-right { display: flex; align-items: center; gap: 10px; }
+
+    /* icon buttons */
+    .ibtn { background: none; border: none; color: #ccff00; cursor: pointer;
+            padding: 4px; border-radius: 4px; display: flex; align-items: center;
+            justify-content: center; transition: background 0.15s; }
+    .ibtn:hover { background: rgba(204,255,0,0.12); }
+
+    /* volume slider */
+    #vol { -webkit-appearance: none; appearance: none;
+           width: 72px; height: 4px; border-radius: 2px;
+           background: rgba(255,255,255,0.25); outline: none; cursor: pointer; }
+    #vol::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px;
+           border-radius: 50%; background: #ccff00; cursor: pointer; }
+    #vol::-moz-range-thumb { width: 13px; height: 13px; border-radius: 50%;
+           background: #ccff00; cursor: pointer; border: none; }
+
+    /* LIVE badge */
+    #live { display: flex; align-items: center; gap: 5px;
+            font-size: 11px; font-weight: 700; letter-spacing: 0.05em; color: #ccff00; }
+    #liveDot { width: 7px; height: 7px; border-radius: 50%; background: #ccff00;
+               animation: pulse 1.8s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* center play/pause */
+    #center { position: absolute; top: 50%; left: 50%; z-index: 25;
+              transform: translate(-50%,-50%);
+              opacity: 0; pointer-events: none;
+              transition: opacity 0.2s ease; }
+    #center.show { opacity: 1; pointer-events: auto; }
+    #playBtn { width: 64px; height: 64px; border-radius: 50%; border: none;
+               background: #ccff00; color: #000; cursor: pointer;
+               display: flex; align-items: center; justify-content: center;
+               box-shadow: 0 0 22px rgba(204,255,0,0.35); }
+
+    /* spinner */
+    #spinner { position: absolute; top: 50%; left: 50%; z-index: 30;
+               transform: translate(-50%,-50%);
+               width: 56px; height: 56px; border-radius: 50%;
+               border: 6px solid rgba(255,255,255,0.08);
+               border-top-color: #ccff00; display: none;
+               animation: spin 0.85s linear infinite; }
+    #spinner.show { display: block; }
+    @keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+
+    /* error overlay */
+    #err { position: absolute; inset: 0; z-index: 40; display: none;
+           align-items: center; justify-content: center; flex-direction: column;
+           gap: 12px; background: rgba(0,0,0,0.9); color: #f87171;
+           font-size: 14px; font-weight: 600; text-align: center; padding: 20px; }
+    #err.show { display: flex; }
+    #errIcon { font-size: 2.5rem; }
+
+    /* unmute hint */
+    #unmute { position: absolute; top: 14px; left: 14px; z-index: 25;
+              display: none; align-items: center; gap: 8px;
+              padding: 10px 18px; border-radius: 50px; cursor: pointer;
+              background: rgba(255,255,255,0.12); backdrop-filter: blur(10px);
+              border: 1px solid rgba(255,255,255,0.2); color: #fff;
+              font-size: 13px; font-weight: 600; }
+    #unmute.show { display: flex; }
+  </style>
+</head>
+<body>
+<div id="root">
+  <video id="v" autoplay playsinline></video>
+  <div id="shield"></div>
+
+  <!-- buffering spinner -->
+  <div id="spinner" class="show"></div>
+
+  <!-- center play/pause button -->
+  <div id="center">
+    <button id="playBtn" aria-label="Play / Pause">
+      <!-- icon set by JS -->
+    </button>
+  </div>
+
+  <!-- unmute hint -->
+  <div id="unmute" role="button" aria-label="Click to Unmute">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508
+        c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121
+        1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5
+        c.945.945 2.561.276 2.561-1.06V4.06zM17.78 9.22a.75.75 0
+        10-1.06 1.06L18.44 12l-1.72 1.72a.75.75 0 001.06 1.06l1.72-1.72
+        1.72 1.72a.75.75 0 101.06-1.06L20.56 12l1.72-1.72a.75.75 0
+        00-1.06-1.06l-1.72 1.72-1.72-1.72z"/>
+    </svg>
+    Click to Unmute
+  </div>
+
+  <!-- error overlay -->
+  <div id="err">
+    <div id="errIcon">⚠️</div>
+    <div id="errMsg">Stream unavailable</div>
+  </div>
+
+  <!-- bottom control bar -->
+  <div id="bar">
+    <div class="bar-left">
+      <button class="ibtn" id="muteBtn" aria-label="Mute / Unmute">
+        <!-- icon set by JS -->
+      </button>
+      <input type="range" id="vol" min="0" max="1" step="0.05" value="0.5"
+             aria-label="Volume" />
+    </div>
+    <div class="bar-right">
+      <div id="live"><div id="liveDot"></div>LIVE</div>
+      <button class="ibtn" id="fsBtn" aria-label="Fullscreen">
+        <!-- icon set by JS -->
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ─── CONFIGURATION ──────────────────────────────────────────────────────────
+  // Points at the public-api proxy worker — swap this env string at deploy time.
+  var PUBLIC_API = 'https://sorapublic.sorascorebackend.workers.dev';
+
+  // SVG icon helpers
+  var ICON = {
+    play: '<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+    pause: '<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>',
+    sound: '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06z"/><path d="M18.584 5.106a.75.75 0 011.06 0c3.808 3.807 3.808 9.98 0 13.788a.75.75 0 11-1.06-1.06 8.25 8.25 0 000-11.668.75.75 0 010-1.06z"/><path d="M15.932 7.757a.75.75 0 011.061 0 6 6 0 010 8.486.75.75 0 01-1.06-1.061 4.5 4.5 0 000-6.364.75.75 0 010-1.06z"/></svg>',
+    mute: '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06zM17.78 9.22a.75.75 0 10-1.06 1.06L18.44 12l-1.72 1.72a.75.75 0 001.06 1.06l1.72-1.72 1.72 1.72a.75.75 0 101.06-1.06L20.56 12l1.72-1.72a.75.75 0 00-1.06-1.06l-1.72 1.72-1.72-1.72z"/></svg>',
+    expand: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>',
+    shrink: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M16 3v3a2 2 0 0 0 2 2h3"/><path d="M8 21v-3a2 2 0 0 0-2-2H3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg>',
+  };
+
+  // ─── SECURITY (counter-bypass approach from bypassdev.md) ───────────────────
+  // Entangled with stream loading: the security module IS what sets the stream URL.
+  // If an attacker disables the security script via Local Overrides,
+  // the stream URL is never set and the player shows an error — it self-destructs.
+  var _streamUrl = null; // only set by the security-guarded init
+  var _guardActive = false;
+  var _idleTimer = null;
+
+  function _kill() {
+    // Destroy the HLS instance immediately to stop ALL network requests.
+    if (window._hls) { try { window._hls.destroy(); } catch(e){} window._hls = null; }
+    var v = document.getElementById('v');
+    if (v) { v.removeAttribute('src'); v.load(); }
+    // Replace the page content so the Network tab shows nothing.
+    document.body.innerHTML = '<div style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;color:#ccff00;font-size:15px;font-weight:600;font-family:sans-serif;letter-spacing:.05em">PLAYBACK STOPPED</div>';
+  }
+
+  function _startGuard() {
+    if (_guardActive) return;
+    _guardActive = true;
+
+    // 1. Disable right-click.
+    document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+    // 2. Window-dimension heuristic — only run when NOT inside an iframe.
+    //    When loaded inside an iframe (Account 3), outerWidth includes the parent
+    //    page chrome so the check would always fire a false positive.
+    var _isIframe = window.self !== window.top;
+    if (!_isIframe) {
+      setInterval(function() {
+        if ((window.outerWidth  - window.innerWidth  > 160) ||
+            (window.outerHeight - window.innerHeight > 160)) {
+          _kill();
+        }
+      }, 800);
+    }
+
+    // 3. debugger timing trap — catches DevTools even when breakpoints are off.
+    //    Skip on mobile (no DevTools threat there).
+    var _isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+    if (!_isMobile) {
+      setInterval(function() {
+        var t0 = performance.now();
+        // eslint-disable-next-line no-debugger
+        debugger; // jshint ignore:line
+        if (performance.now() - t0 > 120) _kill();
+      }, 1200);
+    }
+  }
+
+  // ─── STREAM LOADING ─────────────────────────────────────────────────────────
+  function _buildProxyUrl(channelSlug) {
+    // Constructs the proxy URL — this is what the security module "owns."
+    // If the guard is stripped, this function is stripped too, and the player breaks.
+    var raw = 'https://inproviszon.st/' + channelSlug + '.m3u8';
+    var base = (typeof PUBLIC_API === 'string' && PUBLIC_API.indexOf('%%') === -1)
+      ? PUBLIC_API
+      : '';
+    if (!base) {
+      // Fallback: attempt direct (will 403 without proxy — visible error is acceptable)
+      return raw;
+    }
+    return base + '/api/public/proxy-playlist?url=' + encodeURIComponent(raw);
+  }
+
+  function _getSlug() {
+    var params = new URLSearchParams(window.location.search);
+    return (params.get('ch') || '').replace(/[^a-zA-Z0-9_-]/g, '').trim();
+  }
+
+  // ─── PLAYER STATE ────────────────────────────────────────────────────────────
+  var _playing = true;
+  var _muted = true;
+  var _volume = 0.5;
+  var _uiVisible = false;
+  var _centerTimer = null;
+
+  var vEl      = document.getElementById('v');
+  var shield   = document.getElementById('shield');
+  var spinner  = document.getElementById('spinner');
+  var centerEl = document.getElementById('center');
+  var playBtn  = document.getElementById('playBtn');
+  var unmuteEl = document.getElementById('unmute');
+  var errEl    = document.getElementById('err');
+  var errMsg   = document.getElementById('errMsg');
+  var bar      = document.getElementById('bar');
+  var muteBtn  = document.getElementById('muteBtn');
+  var volSldr  = document.getElementById('vol');
+  var fsBtn    = document.getElementById('fsBtn');
+
+  function _setIcon(el, html) { el.innerHTML = html; }
+
+  function _showSpinner(v) {
+    spinner.classList.toggle('show', v);
+  }
+
+  function _showError(msg) {
+    errMsg.textContent = msg || 'Stream unavailable';
+    errEl.classList.add('show');
+    _showSpinner(false);
+  }
+
+  function _syncMuteUI() {
+    _setIcon(muteBtn, _muted || _volume === 0 ? ICON.mute : ICON.sound);
+    volSldr.value = _muted ? 0 : _volume;
+    unmuteEl.classList.toggle('show', _muted);
+  }
+
+  function _syncPlayUI() {
+    _setIcon(playBtn, _playing ? ICON.pause : ICON.play);
+  }
+
+  function _syncFsUI() {
+    _setIcon(fsBtn, document.fullscreenElement ? ICON.shrink : ICON.expand);
+  }
+
+  // ── UI idle timer ─────────────────────────────────────────────────────────
+  function _showUi() {
+    _uiVisible = true;
+    bar.classList.add('show');
+    clearTimeout(_idleTimer);
+    if (_playing) {
+      _idleTimer = setTimeout(_hideUi, 3000);
+    }
+  }
+
+  function _hideUi() {
+    _uiVisible = false;
+    bar.classList.remove('show');
+    centerEl.classList.remove('show');
+  }
+
+  function _showCenter() {
+    centerEl.classList.add('show');
+    clearTimeout(_centerTimer);
+    _centerTimer = setTimeout(function() {
+      if (_playing) centerEl.classList.remove('show');
+    }, 5000);
+  }
+
+  // ── Click on shield: reveal center button (does NOT pause) ─────────────────
+  shield.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (!_uiVisible) {
+      _showUi();
+      _showCenter();
+    } else {
+      _hideUi();
+    }
+  });
+
+  document.getElementById('root').addEventListener('mousemove', _showUi);
+  document.getElementById('root').addEventListener('mouseleave', function() {
+    if (_playing) _hideUi();
+  });
+
+  // ── Play / Pause button (only this pauses) ─────────────────────────────────
+  playBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (_playing) {
+      // Pause: sever the network connection to save bandwidth.
+      if (window._hls) window._hls.stopLoad();
+      vEl.pause();
+      _playing = false;
+      _syncPlayUI();
+      _showUi(); // keep UI visible while paused
+    } else {
+      // Resume: reconnect and jump to live edge.
+      _showSpinner(true);
+      if (window._hls) {
+        window._hls.startLoad();
+        if (window._hls.liveSyncPosition !== null) {
+          vEl.currentTime = window._hls.liveSyncPosition;
+        }
+      }
+      vEl.play().catch(function() {});
+      _playing = true;
+      _syncPlayUI();
+      clearTimeout(_centerTimer);
+      _centerTimer = setTimeout(function() {
+        centerEl.classList.remove('show');
+      }, 5000);
+    }
+  });
+
+  // ── Volume / Mute ─────────────────────────────────────────────────────────
+  muteBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    _muted = !_muted;
+    vEl.muted = _muted;
+    if (!_muted && _volume === 0) { _volume = 0.5; vEl.volume = 0.5; }
+    _syncMuteUI();
+  });
+
+  volSldr.addEventListener('input', function(e) {
+    e.stopPropagation();
+    _volume = parseFloat(this.value);
+    vEl.volume = _volume;
+    vEl.muted = _volume === 0;
+    _muted = _volume === 0;
+    _syncMuteUI();
+  });
+
+  volSldr.addEventListener('click', function(e) { e.stopPropagation(); });
+
+  unmuteEl.addEventListener('click', function(e) {
+    e.stopPropagation();
+    _muted = false;
+    vEl.muted = false;
+    if (_volume === 0) { _volume = 0.5; vEl.volume = 0.5; }
+    _syncMuteUI();
+  });
+
+  // ── Fullscreen ─────────────────────────────────────────────────────────────
+  fsBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (!document.fullscreenElement) {
+      document.getElementById('root').requestFullscreen().catch(function(){});
+    } else {
+      document.exitFullscreen().catch(function(){});
+    }
+  });
+  document.addEventListener('fullscreenchange', _syncFsUI);
+
+  // ── Video events ───────────────────────────────────────────────────────────
+  vEl.addEventListener('waiting', function() { _showSpinner(true); });
+  vEl.addEventListener('playing', function() { _showSpinner(false); _playing = true; _syncPlayUI(); });
+  vEl.addEventListener('canplay', function() { _showSpinner(false); });
+  vEl.addEventListener('pause',   function() { _playing = false; _syncPlayUI(); });
+
+  // ─── INIT ────────────────────────────────────────────────────────────────────
+  function init() {
+    // Start security guard — this is entangled with stream loading.
+    // Removing this block = _streamUrl never gets set = player breaks.
+    _startGuard();
+    var slug = _getSlug();
+    if (!slug) { _showError('No channel specified. Add ?ch=channel-slug to the URL.'); return; }
+    _streamUrl = _buildProxyUrl(slug);
+
+    // Set initial UI state — show controls immediately on load.
+    _syncMuteUI();
+    _syncPlayUI();
+    _syncFsUI();
+    _showUi();
+    _showCenter();
+
+    // Start HLS.
+    if (Hls.isSupported()) {
+      var hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+      window._hls = hls;
+
+      hls.on(Hls.Events.ERROR, function(e, data) {
+        if (data.fatal) {
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+            _showError('Stream unreachable. Check the channel slug or try again.');
+          } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+            hls.recoverMediaError();
+          } else {
+            _showError('Fatal playback error: ' + data.details);
+          }
+        }
+      });
+
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        _showSpinner(false);
+        _hideUi(); // stream started — hide controls, let user hover to show
+        vEl.play().catch(function() {});
+      });
+
+      hls.attachMedia(vEl);
+      hls.on(Hls.Events.MEDIA_ATTACHED, function() {
+        hls.loadSource(_streamUrl);
+      });
+
+    } else if (vEl.canPlayType('application/vnd.apple.mpegurl')) {
+      // Safari native HLS
+      vEl.src = _streamUrl;
+      vEl.play().catch(function() {});
+    } else {
+      _showError('HLS playback is not supported in this browser.');
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+}());
+</script>
+</body>
+</html>
