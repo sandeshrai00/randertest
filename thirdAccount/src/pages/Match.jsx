@@ -16,6 +16,14 @@ function formatTime(t) {
   } catch { return t; }
 }
 
+function isFinished(eventTime) {
+  if (!eventTime) return false;
+  try {
+    const passed = Date.now() - new Date(eventTime).getTime();
+    return passed > 10800000; // 3 hours
+  } catch { return false; }
+}
+
 export default function Match() {
   const { slug } = useParams();
   const [match, setMatch] = useState(null);
@@ -66,6 +74,8 @@ export default function Match() {
     );
   }
 
+  const finished = isFinished(match.event_time);
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -77,49 +87,71 @@ export default function Match() {
       </header>
 
       <main className={styles.main}>
-        <div className={styles.player}>
-          {embedUrl ? (
-            <iframe
-              key={activeChannel}
-              src={embedUrl}
-              title={match.title}
-              className={styles.iframe}
-              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-              allowFullScreen
-            />
-          ) : (
-            <div className={styles.noStream}>No stream available</div>
-          )}
-        </div>
+        {finished ? (
+          <>
+            <div className={styles.finished} {...(match.logo_url ? { style: { backgroundImage: `url(${match.logo_url})` } } : {})}>
+              <div className={styles.finishedOverlay} />
+              <div className={styles.finishedBadge}>FINISHED</div>
+            </div>
+            <div className={styles.info}>
+              <div className={styles.infoTop}>
+                {match.genre && GENRES[match.genre] && (
+                  <span className={styles.badge}>{GENRES[match.genre]}</span>
+                )}
+                {match.event_time && (
+                  <span className={styles.time}>{formatTime(match.event_time)}</span>
+                )}
+              </div>
+              <h1 className={styles.title}>{match.title}</h1>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={styles.player}>
+              {embedUrl ? (
+                <iframe
+                  key={activeChannel}
+                  src={embedUrl}
+                  title={match.title}
+                  className={styles.iframe}
+                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                  allowFullScreen
+                />
+              ) : (
+                <div className={styles.noStream}>No stream available</div>
+              )}
+            </div>
 
-        {match.channels && match.channels.length > 1 && (
-          <div className={styles.streams}>
-            {match.channels.map((c, i) => (
-              <button
-                key={c.channel_slug}
-                className={`${styles.streamBtn} ${activeChannel === c.channel_slug ? styles.streamBtnActive : ''}`}
-                onClick={() => setActiveChannel(c.channel_slug)}
-              >
-                {c.label || `Stream ${i + 1}`}
-              </button>
-            ))}
-          </div>
+            {match.channels && match.channels.length > 1 && (
+              <div className={styles.streams}>
+                {match.channels.map((c, i) => (
+                  <button
+                    key={c.channel_slug}
+                    className={`${styles.streamBtn} ${activeChannel === c.channel_slug ? styles.streamBtnActive : ''}`}
+                    onClick={() => setActiveChannel(c.channel_slug)}
+                  >
+                    {c.label || `Stream ${i + 1}`}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className={styles.info}>
+              <div className={styles.infoTop}>
+                {match.genre && GENRES[match.genre] && (
+                  <span className={styles.badge}>{GENRES[match.genre]}</span>
+                )}
+                {match.event_time && (
+                  <span className={styles.time}>{formatTime(match.event_time)}</span>
+                )}
+              </div>
+              <h1 className={styles.title}>{match.title}</h1>
+              <p className={styles.streamsCount}>
+                {match.channels ? match.channels.length : 0} stream{match.channels && match.channels.length !== 1 ? 's' : ''} available
+              </p>
+            </div>
+          </>
         )}
-
-        <div className={styles.info}>
-          <div className={styles.infoTop}>
-            {match.genre && GENRES[match.genre] && (
-              <span className={styles.badge}>{GENRES[match.genre]}</span>
-            )}
-            {match.event_time && (
-              <span className={styles.time}>{formatTime(match.event_time)}</span>
-            )}
-          </div>
-          <h1 className={styles.title}>{match.title}</h1>
-          <p className={styles.streamsCount}>
-            {match.channels ? match.channels.length : 0} stream{match.channels && match.channels.length !== 1 ? 's' : ''} available
-          </p>
-        </div>
       </main>
 
       <Footer />
