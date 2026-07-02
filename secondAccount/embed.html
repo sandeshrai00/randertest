@@ -21,9 +21,9 @@
          object-fit: contain; background: #000; }
 
     /* center play/pause */
-    #center { position: absolute; inset: 0; z-index: 25;
+    #center { position: absolute; inset: 0; z-index: 5;
               display: flex; align-items: center; justify-content: center;
-              background: rgba(0,0,0,0);
+              background: transparent;
               opacity: 0; pointer-events: none;
               transition: opacity 0.3s ease, background 0.3s ease; }
     #center.show { opacity: 1; pointer-events: auto; background: rgba(0,0,0,0.4); }
@@ -47,10 +47,12 @@
     /* icon buttons */
     .ibtn { background: none; border: none; color: #ccff00; cursor: pointer;
             padding: 8px; border-radius: 50%; display: flex; align-items: center;
-            justify-content: center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); outline: none; }
+            justify-content: center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); outline: none;
+            touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
     .ibtn:hover { transform: scale(1.15); filter: drop-shadow(0 0 8px rgba(204, 255, 0, 0.4)); }
     .ibtn svg { width: 24px; height: 24px; }
     #fsBtn svg { width: 20px; height: 20px; }
+    #playBtn { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 
     /* volume UI */
     .bar-left { position: relative; } /* Anchor for absolute popup slider */
@@ -296,7 +298,6 @@
     if (_playing) centerEl.classList.remove('show');
   }
 
-  // Toggle UI on tap/click anywhere on the video area (except controls)
   function toggleUI(e) {
     if (playBtn.contains(e.target) || bar.contains(e.target) || volWrap.contains(e.target)) return;
     if (_uiVisible) {
@@ -308,12 +309,11 @@
 
   var videoArea = vEl.parentElement;
   videoArea.addEventListener('click', toggleUI);
-  videoArea.addEventListener('touchstart', toggleUI, { passive: true });
   videoArea.addEventListener('mousemove', function() { if (!_uiVisible) _showUi(); });
   videoArea.addEventListener('mouseleave', function() { if (_playing) _hideUi(); });
 
   // ── Play / Pause button ────────────────────────────────────────────────────
-  function togglePlay(e) {
+  playBtn.addEventListener('click', function(e) {
     e.stopPropagation();
     if (_playing) {
       if (window._hls) window._hls.stopLoad();
@@ -330,23 +330,17 @@
     }
     _syncPlayUI();
     _showUi();
-  }
-
-  playBtn.addEventListener('click', togglePlay);
-  playBtn.addEventListener('touchstart', function(e) { e.preventDefault(); togglePlay(e); }, { passive: false });
+  });
 
   // ── Volume / Mute ─────────────────────────────────────────────────────────
-  function toggleMute(e) {
+  muteBtn.addEventListener('click', function(e) {
     e.stopPropagation();
     _muted = !_muted;
     vEl.muted = _muted;
     if (!_muted && _volume === 0) { _volume = 0.5; vEl.volume = 0.5; }
     _syncMuteUI();
     _showUi();
-  }
-
-  muteBtn.addEventListener('click', toggleMute);
-  muteBtn.addEventListener('touchstart', function(e) { e.preventDefault(); toggleMute(e); }, { passive: false });
+  });
 
   volSldr.addEventListener('input', function(e) {
     e.stopPropagation();
@@ -359,7 +353,7 @@
   volSldr.addEventListener('click', function(e) { e.stopPropagation(); });
 
   // ── Fullscreen ─────────────────────────────────────────────────────────────
-  function toggleFs(e) {
+  fsBtn.addEventListener('click', function(e) {
     e.stopPropagation();
     if (!document.fullscreenElement) {
       document.getElementById('root').requestFullscreen().catch(function(){});
@@ -367,10 +361,7 @@
       document.exitFullscreen().catch(function(){});
     }
     _showUi();
-  }
-
-  fsBtn.addEventListener('click', toggleFs);
-  fsBtn.addEventListener('touchstart', function(e) { e.preventDefault(); toggleFs(e); }, { passive: false });
+  });
   document.addEventListener('fullscreenchange', _syncFsUI);
 
   // ── Video events ───────────────────────────────────────────────────────────
