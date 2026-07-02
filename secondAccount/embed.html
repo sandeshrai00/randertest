@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>SoraScore Player</title>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.6.16/dist/hls.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { width: 100%; height: 100%; background: #000; overflow: hidden;
@@ -256,10 +256,6 @@
     syncMute();
   });
   vol.addEventListener('click', function(e) { e.stopPropagation(); });
-  // Close vol wrap when clicking outside
-  document.addEventListener('click', function(e) {
-    if (!e.target.closest('.bar-left')) vWrap.classList.remove('open');
-  });
 
   // ─── Fullscreen ────────────────────────────────────────────────────────────
   fsBtn.addEventListener('click', function(e) {
@@ -297,7 +293,7 @@
     setInterval(function() {
       var t0 = performance.now();
       debugger;
-      if (performance.now() - t0 > 120) {
+      if (performance.now() - t0 > 400) {
         if (window._hls) { try { window._hls.destroy(); } catch(e){} window._hls = null; }
         v.removeAttribute('src'); v.load();
         document.body.innerHTML = '<div style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;color:#ccff00;font-size:15px;font-weight:600;font-family:sans-serif;letter-spacing:.05em">PLAYBACK STOPPED</div>';
