@@ -14,6 +14,25 @@ function formatTime(t) {
   } catch { return t; }
 }
 
+function getTimeStatus(eventTime) {
+  if (!eventTime) return { type: 'unknown' };
+  try {
+    const now = Date.now();
+    const t = new Date(eventTime).getTime();
+    const diff = t - now;
+    if (diff > 0) {
+      const hours = Math.floor(diff / 3600000);
+      const mins = Math.floor((diff % 3600000) / 60000);
+      if (hours > 24) return { type: 'upcoming', text: `${Math.floor(hours / 24)}D` };
+      if (hours > 0) return { type: 'upcoming', text: `${hours}H ${mins}M` };
+      return { type: 'upcoming', text: `${mins}M` };
+    }
+    const passed = Math.abs(diff);
+    if (passed < 10800000) return { type: 'live', text: 'LIVE' };
+    return { type: 'finished', text: 'FINISHED' };
+  } catch { return { type: 'unknown' }; }
+}
+
 export default function Home() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,8 +45,13 @@ export default function Home() {
       .finally(() => setLoading(false));
   }, []);
 
-  const featured = matches[0];
-  const rest = matches.slice(1);
+  const grouped = {};
+  for (const m of matches) {
+    const g = m.genre || 'other';
+    if (!grouped[g]) grouped[g] = [];
+    grouped[g].push(m);
+  }
+  const sections = Object.entries(grouped);
 
   if (loading) {
     return (
@@ -43,7 +67,7 @@ export default function Home() {
     return (
       <div className={styles.page}>
         <div className={styles.center}>
-          <p className={styles.error}>Failed to load matches: {error}</p>
+          <p className={styles.errorText}>Failed to load matches: {error}</p>
         </div>
       </div>
     );
@@ -59,7 +83,7 @@ export default function Home() {
           </div>
         </header>
         <div className={styles.center}>
-          <p className={styles.empty}>No live matches right now. Check back soon.</p>
+          <p className={styles.emptyText}>No live matches right now. Check back soon.</p>
         </div>
       </div>
     );
@@ -76,67 +100,52 @@ export default function Home() {
       </header>
 
       <main className={styles.main}>
-        {/* Hero */}
-        {featured && (
-          <Link to={`/live/${featured.custom_slug}`} className={styles.hero}>
-            <div className={styles.heroBg}>
-              {featured.logo_url && (
-                <img src={featured.logo_url} alt="" className={styles.heroLogo} />
-              )}
-            </div>
-            <div className={styles.heroBody}>
-              <div className={styles.heroMeta}>
-                {featured.genre && GENRES[featured.genre] && (
-                  <span className={styles.badge}>{GENRES[featured.genre]}</span>
-                )}
-                {featured.event_time && (
-                  <span className={styles.heroTime}>{formatTime(featured.event_time)}</span>
-                )}
-              </div>
-              <h2 className={styles.heroTitle}>{featured.title}</h2>
-              <span className={styles.heroCta}>Watch →</span>
-            </div>
-          </Link>
-        )}
-
-        {/* Upcoming divider */}
-        {rest.length > 0 && (
-          <>
-            <div className={styles.divider}>
-              <span className={styles.dividerLabel}>Upcoming</span>
-            </div>
-
-            <div className={styles.list}>
-              {rest.map(m => (
-                <Link key={m.id} to={`/live/${m.custom_slug}`} className={styles.item}>
-                  {m.logo_url && (
-                    <img
-                      src={m.logo_url}
-                      alt=""
-                      className={styles.itemLogo}
-                      onError={e => { e.target.style.display = 'none'; }}
-                    />
-                  )}
-                  <div className={styles.itemBody}>
-                    <div className={styles.itemTitle}>{m.title}</div>
-                    <div className={styles.itemMeta}>
-                      {m.genre && GENRES[m.genre] && (
-                        <span className={styles.badge}>{GENRES[m.genre]}</span>
+        {sections.map(([genreId, sectionMatches]) => (
+          <div key={genreId} className={styles.section}>
+            <h2 className={styles.sectionTitle}>
+              {GENRES[genreId] || 'Other'}
+            </h2>
+            <div className={styles.row}>
+              {sectionMatches.map(m => {
+                const status = getTimeStatus(m.event_time);
+                return (
+                  <Link
+                    key={m.id}
+                    to={`/live/${m.custom_slug}`}
+                    className={styles.card}
+                    {...(m.logo_url ? { style: { backgroundImage: `url(${m.logo_url})` } } : {})}
+                  >
+                    <div className={styles.cardOverlay} />
+                    <div className={styles.cardTop}>
+                      {status.type === 'live' && (
+                        <div className={styles.liveBadge}>
+                          <div className={styles.liveDot} />
+                          LIVE
+                        </div>
                       )}
-                      <span className={styles.itemDetail}>
-                        {m.channel_count} stream{m.channel_count === 1 ? '' : 's'}
-                      </span>
-                      {m.event_time && (
-                        <span className={styles.itemDetail}>{formatTime(m.event_time)}</span>
+                      {status.type === 'upcoming' && (
+                        <div className={styles.upcomingBadge}>{status.text}</div>
                       )}
                     </div>
-                  </div>
-                  <span className={styles.itemArrow}>→</span>
-                </Link>
-              ))}
+                    <div className={styles.cardContent}>
+                      <h3 className={styles.cardTitle}>{m.title}</h3>
+                      <div className={styles.cardBottom}>
+                        {status.type === 'live' ? (
+                          <span className={styles.cardLive}>LIVE</span>
+                        ) : m.event_time ? (
+                          <span className={styles.cardTime}>{formatTime(m.event_time)}</span>
+                        ) : null}
+                        {status.type === 'finished' && (
+                          <div className={styles.finishedBadge}>FINISHED</div>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
-          </>
-        )}
+          </div>
+        ))}
       </main>
 
       <Footer />
