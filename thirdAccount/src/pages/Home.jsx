@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchMatches, GENRES } from '../api';
+import Footer from '../components/Footer';
 import styles from './Home.module.css';
 
 function formatTime(t) {
@@ -137,6 +138,8 @@ export default function Home() {
           </>
         )}
       </main>
+
+      <Footer />
     </div>
   );
 }

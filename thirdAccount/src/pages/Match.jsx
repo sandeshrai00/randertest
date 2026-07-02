@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchMatch, GENRES } from '../api';
+import Footer from '../components/Footer';
 import styles from './Match.module.css';
 
 const EMBED_BASE = import.meta.env.VITE_EMBED_URL || '';
@@ -120,6 +121,8 @@ export default function Match() {
           </p>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }
