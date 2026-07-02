@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchMatch, GENRES } from '../api';
 import styles from './Match.module.css';
@@ -21,10 +21,7 @@ export default function Match() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeChannel, setActiveChannel] = useState(null);
-  const [controlsVisible, setControlsVisible] = useState(true);
   const iframeRef = useRef(null);
-  const idleTimerRef = useRef(null);
-  const isTouch = 'ontouchstart' in window;
 
   useEffect(() => {
     setLoading(true);
@@ -44,53 +41,14 @@ export default function Match() {
       .finally(() => setLoading(false));
   }, [slug]);
 
-  const startIdle = useCallback(() => {
-    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-    idleTimerRef.current = setTimeout(() => setControlsVisible(false), 3000);
-  }, []);
-
-  useEffect(() => {
-    if (!loading && !error && match) {
-      setControlsVisible(true);
-      startIdle();
-    }
-    return () => {
-      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-    };
-  }, [loading, error, match, startIdle]);
-
-  const wake = useCallback(() => {
-    setControlsVisible(true);
-    startIdle();
-  }, [startIdle]);
-
-  const handleMouseMove = useCallback(() => {
-    if (!isTouch) wake();
-  }, [wake, isTouch]);
-
-  const handleMouseLeave = useCallback(() => {
-    if (!isTouch) {
-      setControlsVisible(false);
-      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-    }
-  }, [isTouch]);
-
-  const handlePageClick = useCallback((e) => {
-    if (e.target.closest('button') || e.target.closest('a')) return;
-    setControlsVisible(prev => !prev);
-    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-  }, []);
-
   const embedUrl = activeChannel
     ? `${EMBED_BASE}/embed?ch=${encodeURIComponent(activeChannel)}`
     : null;
 
-  const oc = controlsVisible ? styles.ov : styles.oh;
-
   if (loading) {
     return (
-      <div className={styles.page} onMouseMove={handleMouseMove}>
-        <div className={styles.centerOverlay}>
+      <div className={styles.page}>
+        <div className={styles.center}>
           <div className={styles.spinner} />
         </div>
       </div>
@@ -99,9 +57,9 @@ export default function Match() {
 
   if (error || !match) {
     return (
-      <div className={styles.page} onMouseMove={handleMouseMove}>
-        <div className={styles.centerOverlay}>
-          <p className={styles.errorText}>{error || 'Match not found.'}</p>
+      <div className={styles.page}>
+        <div className={styles.center}>
+          <p className={styles.error}>{error || 'Match not found.'}</p>
           <Link to="/" className={styles.homeLink}>← Back to matches</Link>
         </div>
       </div>
@@ -109,57 +67,30 @@ export default function Match() {
   }
 
   return (
-    <div
-      className={styles.page}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onClick={handlePageClick}
-    >
-      {/* Full-viewport player */}
-      <div className={styles.playerWrap}>
-        {embedUrl ? (
-          <iframe
-            ref={iframeRef}
-            key={activeChannel}
-            src={embedUrl}
-            title={match.title}
-            className={styles.iframe}
-            allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-            allowFullScreen
-          />
-        ) : (
-          <div className={styles.noStream}>No stream available</div>
-        )}
-      </div>
-
-      {/* Top overlay */}
-      <div className={`${styles.top} ${oc}`}>
+    <div className={styles.page}>
+      <header className={styles.header}>
         <Link to="/" className={styles.back}>← All Matches</Link>
-        <img src="/logo.png" alt="SoraScore" className={styles.logo} />
-      </div>
+        <div className={styles.brand}>
+          <img src="/logo.png" alt="SoraScore" className={styles.logo} />
+          <span className={styles.brandText}>oraScore TV</span>
+        </div>
+      </header>
 
-      {/* Bottom overlay */}
-      <div className={`${styles.bottom} ${oc}`}>
-        <div className={styles.info}>
-          {match.logo_url && (
-            <img
-              src={match.logo_url}
-              alt=""
-              className={styles.matchLogo}
-              onError={e => { e.target.style.display = 'none'; }}
+      <main className={styles.main}>
+        <div className={styles.playerWrap}>
+          {embedUrl ? (
+            <iframe
+              ref={iframeRef}
+              key={activeChannel}
+              src={embedUrl}
+              title={match.title}
+              className={styles.iframe}
+              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+              allowFullScreen
             />
+          ) : (
+            <div className={styles.noStream}>No stream available</div>
           )}
-          <div>
-            <h1 className={styles.title}>{match.title}</h1>
-            <div className={styles.meta}>
-              {match.genre && GENRES[match.genre] && (
-                <span className={styles.badge}>{GENRES[match.genre]}</span>
-              )}
-              {match.event_time && (
-                <span className={styles.time}>{formatTime(match.event_time)}</span>
-              )}
-            </div>
-          </div>
         </div>
 
         {match.channels && match.channels.length > 1 && (
@@ -168,7 +99,7 @@ export default function Match() {
               <button
                 key={c.channel_slug}
                 className={`${styles.streamBtn} ${activeChannel === c.channel_slug ? styles.streamBtnActive : ''}`}
-                onClick={() => { setActiveChannel(c.channel_slug); wake(); }}
+                onClick={() => setActiveChannel(c.channel_slug)}
               >
                 {c.label || `Stream ${i + 1}`}
               </button>
@@ -176,12 +107,19 @@ export default function Match() {
           </div>
         )}
 
-        {(!match.channels || match.channels.length <= 1) && (
-          <div className={styles.streams}>
-            <span className={styles.streamsLabel}>1 stream available</span>
-          </div>
-        )}
-      </div>
+        <div className={styles.info}>
+          {match.genre && GENRES[match.genre] && (
+            <span className={styles.badge}>{GENRES[match.genre]}</span>
+          )}
+          <h1 className={styles.title}>{match.title}</h1>
+          {match.event_time && (
+            <>
+              <span className={styles.dot}>•</span>
+              <span className={styles.time}>{formatTime(match.event_time)}</span>
+            </>
+          )}
+        </div>
+      </main>
     </div>
   );
 }
