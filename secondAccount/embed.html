@@ -2,89 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>SoraScore Player</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { width: 100%; height: 100%; background: #0f0f13; overflow: hidden;
+    html, body { width: 100%; height: 100%; background: #000; overflow: hidden;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      -webkit-user-select: none; user-select: none; }
-    #root { position: relative; width: 100%; height: 100%; background: #0f0f13;
-      display: flex; flex-direction: column; }
+      -webkit-user-select: none; user-select: none;
+      -webkit-tap-highlight-color: transparent; }
+    #root { position: relative; width: 100%; height: 100%; background: #000; }
 
-    /* video wrapper — fills remaining space */
-    #videoWrap { flex: 1; position: relative; background: #000; min-height: 0; }
-
-    /* video */
     #v { position: absolute; inset: 0; width: 100%; height: 100%;
-         object-fit: contain; background: #000; }
-
-    /* center play/pause */
-    #center { position: absolute; inset: 0; z-index: 5;
-              display: flex; align-items: center; justify-content: center;
-              background: transparent;
-              opacity: 0; pointer-events: none;
-              transition: opacity 0.3s ease, background 0.3s ease; }
-    #center.show { opacity: 1; pointer-events: auto; background: rgba(0,0,0,0.4); }
-    #playBtn { width: 72px; height: 72px; border-radius: 50%; border: none;
-               background: rgba(204, 255, 0, 0.9); color: #000; cursor: pointer;
-               display: flex; align-items: center; justify-content: center;
-               box-shadow: 0 8px 32px rgba(204, 255, 0, 0.4); transition: background 0.2s ease; }
-    #center.show #playBtn:hover { background: rgba(204, 255, 0, 1); }
-    #playBtn svg { width: 40px; height: 40px; }
-
-    /* bottom control bar */
-    #bar { position: absolute; bottom: 0; left: 0; right: 0; z-index: 20;
-           display: flex; align-items: center; justify-content: space-between;
-           padding: 40px 20px 20px 20px;
-           background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
-           opacity: 0; transform: translateY(20px); transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; }
-    #bar.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
-
-    .bar-left, .bar-right { display: flex; align-items: center; gap: 16px; }
-
-    /* icon buttons */
-    .ibtn { background: none; border: none; color: #ccff00; cursor: pointer;
-            padding: 8px; border-radius: 50%; display: flex; align-items: center;
-            justify-content: center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); outline: none;
-            touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-    .ibtn:hover { transform: scale(1.15); filter: drop-shadow(0 0 8px rgba(204, 255, 0, 0.4)); }
-    .ibtn svg { width: 24px; height: 24px; }
-    #fsBtn svg { width: 20px; height: 20px; }
-    #playBtn { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-
-    /* volume UI */
-    .bar-left { position: relative; } /* Anchor for absolute popup slider */
-    #volWrap { position: absolute; bottom: 100%; left: 16px; transform: translateX(-50%) translateY(10px);
-               height: 0; width: 24px; overflow: hidden;
-               transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s ease, opacity 0.3s ease;
-               opacity: 0; display: flex; justify-content: center; align-items: center;
-               margin-bottom: 8px; pointer-events: none; }
-    .bar-left:hover #volWrap { height: 90px; transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
-    
-    #vol { -webkit-appearance: none; appearance: none; width: 80px; height: 8px;
-           background: rgba(255, 255, 255, 0.4); border-radius: 4px; outline: none;
-           cursor: pointer; transform: rotate(-90deg); }
-    #vol::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px;
-           border-radius: 50%; background: #ccff00; cursor: pointer;
-           box-shadow: 0 2px 6px rgba(204, 255, 0, 0.5); transition: transform 0.2s ease; }
-    #vol::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; border: none;
-           background: #ccff00; cursor: pointer; box-shadow: 0 2px 6px rgba(204, 255, 0, 0.5); }
-    #vol::-webkit-slider-thumb:hover { transform: scale(1.2); box-shadow: 0 2px 10px rgba(204, 255, 0, 0.8); }
-
-    /* LIVE badge */
-    #live { display: flex; align-items: center; gap: 8px;
-            font-size: 14px; font-weight: 700; letter-spacing: 1px; color: #ccff00;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8); }
-    #liveDot { width: 8px; height: 8px; border-radius: 50%; background: #ccff00;
-               animation: pulse 2s infinite; }
-    @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(204, 255, 0, 0.7); }
-                       70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(204, 255, 0, 0); }
-                       100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(204, 255, 0, 0); } }
+         object-fit: contain; background: #000; display: block; }
 
     /* spinner */
-    #spinner { position: absolute; top: 50%; left: 50%; z-index: 30;
+    #spinner { position: absolute; top: 50%; left: 50%; z-index: 10;
                transform: translate(-50%,-50%);
                width: 44px; height: 44px; border-radius: 50%;
                border: 5px solid rgba(255,255,255,0.08);
@@ -94,59 +27,110 @@
     @keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
 
     /* error overlay */
-    #err { position: absolute; inset: 0; z-index: 40; display: none;
+    #err { position: absolute; inset: 0; z-index: 10; display: none;
            align-items: center; justify-content: center; flex-direction: column;
            gap: 12px; background: rgba(0,0,0,0.9); color: #f87171;
            font-size: 14px; font-weight: 600; text-align: center; padding: 20px; }
     #err.show { display: flex; }
-    #errIcon { font-size: 2.5rem; }
 
-    /* error overlay */
+    /* center play/pause button — always pointer-events: none when hidden */
+    #center { position: absolute; inset: 0; z-index: 5;
+              display: flex; align-items: center; justify-content: center;
+              pointer-events: none;
+              opacity: 0; transition: opacity 0.25s ease; }
+    #center.show { opacity: 1; pointer-events: auto; }
+    #playBtn { width: 72px; height: 72px; border-radius: 50%; border: none;
+               background: rgba(204, 255, 0, 0.9); color: #000; cursor: pointer;
+               display: flex; align-items: center; justify-content: center;
+               box-shadow: 0 8px 32px rgba(204, 255, 0, 0.4);
+               touch-action: manipulation; }
+    #playBtn:active { transform: scale(0.92); }
+    #playBtn svg { width: 40px; height: 40px; pointer-events: none; }
+
+    /* bottom control bar — pointer-events: none when hidden */
+    #bar { position: absolute; bottom: 0; left: 0; right: 0; z-index: 5;
+           display: flex; align-items: center; justify-content: space-between;
+           padding: 40px 20px 20px;
+           background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+           pointer-events: none;
+           opacity: 0; transform: translateY(16px);
+           transition: opacity 0.25s ease, transform 0.25s ease; }
+    #bar.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+    .bar-left, .bar-right { display: flex; align-items: center; gap: 16px; }
+    .bar-left { position: relative; }
+
+    .ibtn { background: none; border: none; color: #ccff00; cursor: pointer;
+            padding: 10px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; outline: none; touch-action: manipulation; }
+    .ibtn:active { transform: scale(0.9); }
+    .ibtn svg { width: 26px; height: 26px; pointer-events: none; }
+    #fsBtn svg { width: 22px; height: 22px; }
+
+    /* volume slider — pops up on hover/tap of mute area */
+    #volWrap { position: absolute; bottom: 100%; left: 16px;
+               transform: translateX(-50%);
+               height: 0; width: 40px; overflow: hidden;
+               opacity: 0; pointer-events: none;
+               transition: height 0.25s ease, opacity 0.25s ease;
+               margin-bottom: 8px;
+               display: flex; justify-content: center; align-items: center; }
+    .bar-left:hover #volWrap,
+    .bar-left:active #volWrap,
+    #volWrap.open { height: 120px; opacity: 1; pointer-events: auto; }
+    #vol { -webkit-appearance: none; appearance: none; width: 80px; height: 8px;
+           background: rgba(255,255,255,0.4); border-radius: 4px; outline: none;
+           cursor: pointer; transform: rotate(-90deg); touch-action: none; }
+    #vol::-webkit-slider-thumb { -webkit-appearance: none; appearance: none;
+           width: 18px; height: 18px; border-radius: 50%; background: #ccff00;
+           cursor: pointer; box-shadow: 0 2px 6px rgba(204,255,0,0.5); }
+    #vol::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%;
+           border: none; background: #ccff00; cursor: pointer;
+           box-shadow: 0 2px 6px rgba(204,255,0,0.5); }
+
+    /* LIVE badge */
+    #live { display: flex; align-items: center; gap: 8px;
+            font-size: 13px; font-weight: 700; letter-spacing: 1px; color: #ccff00;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+    #liveDot { width: 8px; height: 8px; border-radius: 50%; background: #ccff00;
+               animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(204,255,0,0.7); }
+                       70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(204,255,0,0); }
+                       100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(204,255,0,0); } }
 
     @media (max-width: 600px) {
-      #bar { padding: 30px 10px 10px 10px; }
       #playBtn { width: 56px; height: 56px; }
       #playBtn svg { width: 32px; height: 32px; }
+      #bar { padding: 30px 10px 12px; }
       .bar-left, .bar-right { gap: 10px; }
-      #live { font-size: 12px; }
-      #liveDot { width: 6px; height: 6px; }
+      .ibtn svg { width: 22px; height: 22px; }
+      #fsBtn svg { width: 18px; height: 18px; }
+      #live { font-size: 11px; }
     }
   </style>
 </head>
 <body>
 <div id="root">
-  <!-- Video area -->
-  <div id="videoWrap">
-    <video id="v" autoplay playsinline muted></video>
+  <video id="v" autoplay playsinline muted></video>
 
-    <!-- buffering spinner -->
-    <div id="spinner" class="show"></div>
+  <div id="spinner" class="show"></div>
 
-    <!-- center play/pause overlay — click on overlay area toggles UI, click button toggles play -->
-    <div id="center">
-      <button id="playBtn" aria-label="Play / Pause"></button>
-    </div>
+  <div id="err"><div id="errMsg">Stream unavailable</div></div>
 
-    <!-- error overlay -->
-    <div id="err">
-      <div id="errIcon">⚠️</div>
-      <div id="errMsg">Stream unavailable</div>
-    </div>
+  <div id="center">
+    <button id="playBtn" aria-label="Play/Pause"></button>
+  </div>
 
-    <!-- bottom control bar -->
-    <div id="bar">
-      <div class="bar-left">
-        <button class="ibtn" id="muteBtn" aria-label="Mute / Unmute">
-        </button>
-        <div id="volWrap">
-          <input type="range" id="vol" min="0" max="1" step="0.05" value="0.5" aria-label="Volume" />
-        </div>
+  <div id="bar">
+    <div class="bar-left">
+      <button class="ibtn" id="muteBtn" aria-label="Mute/Unmute"></button>
+      <div id="volWrap">
+        <input type="range" id="vol" min="0" max="1" step="0.05" value="0.5" aria-label="Volume" />
       </div>
-      <div class="bar-right">
-        <div id="live"><div id="liveDot"></div>LIVE</div>
-        <button class="ibtn" id="fsBtn" aria-label="Fullscreen">
-        </button>
-      </div>
+    </div>
+    <div class="bar-right">
+      <div id="live"><div id="liveDot"></div>LIVE</div>
+      <button class="ibtn" id="fsBtn" aria-label="Fullscreen"></button>
     </div>
   </div>
 </div>
@@ -155,236 +139,210 @@
 (function () {
   'use strict';
 
-  // ─── CONFIGURATION ──────────────────────────────────────────────────────────
-  // Points at the public-api proxy worker — swap this env string at deploy time.
   var PUBLIC_API = 'https://sorapublic.sorascorebackend.workers.dev';
 
-  // SVG icon helpers
   var ICON = {
-    play: '<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
-    pause: '<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>',
-    sound: '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06z"/><path d="M18.584 5.106a.75.75 0 011.06 0c3.808 3.807 3.808 9.98 0 13.788a.75.75 0 11-1.06-1.06 8.25 8.25 0 000-11.668.75.75 0 010-1.06z"/><path d="M15.932 7.757a.75.75 0 011.061 0 6 6 0 010 8.486.75.75 0 01-1.06-1.061 4.5 4.5 0 000-6.364.75.75 0 010-1.06z"/></svg>',
-    mute: '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06zM17.78 9.22a.75.75 0 10-1.06 1.06L18.44 12l-1.72 1.72a.75.75 0 001.06 1.06l1.72-1.72 1.72 1.72a.75.75 0 101.06-1.06L20.56 12l1.72-1.72a.75.75 0 00-1.06-1.06l-1.72 1.72-1.72-1.72z"/></svg>',
-    expand: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>',
-    shrink: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M16 3v3a2 2 0 0 0 2 2h3"/><path d="M8 21v-3a2 2 0 0 0-2-2H3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg>',
+    play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+    pause: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>',
+    sound: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06z"/><path d="M18.584 5.106a.75.75 0 011.06 0c3.808 3.807 3.808 9.98 0 13.788a.75.75 0 11-1.06-1.06 8.25 8.25 0 000-11.668.75.75 0 010-1.06z"/><path d="M15.932 7.757a.75.75 0 011.061 0 6 6 0 010 8.486.75.75 0 01-1.06-1.061 4.5 4.5 0 000-6.364.75.75 0 010-1.06z"/></svg>',
+    mute: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06zM17.78 9.22a.75.75 0 10-1.06 1.06L18.44 12l-1.72 1.72a.75.75 0 001.06 1.06l1.72-1.72 1.72 1.72a.75.75 0 101.06-1.06L20.56 12l1.72-1.72a.75.75 0 00-1.06-1.06l-1.72 1.72-1.72-1.72z"/></svg>',
+    expand: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>',
+    shrink: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M16 3v3a2 2 0 0 0 2 2h3"/><path d="M8 21v-3a2 2 0 0 0-2-2H3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg>',
   };
 
-  // ─── SECURITY (counter-bypass approach from bypassdev.md) ───────────────────
-  // Entangled with stream loading: the security module IS what sets the stream URL.
-  // If an attacker disables the security script via Local Overrides,
-  // the stream URL is never set and the player shows an error — it self-destructs.
-  var _streamUrl = null; // only set by the security-guarded init
-  var _guardActive = false;
-  var _idleTimer = null;
+  // ─── DOM refs ──────────────────────────────────────────────────────────────
+  var root  = document.getElementById('root');
+  var v     = document.getElementById('v');
+  var spin  = document.getElementById('spinner');
+  var err   = document.getElementById('err');
+  var errM  = document.getElementById('errMsg');
+  var ctr   = document.getElementById('center');
+  var pBtn  = document.getElementById('playBtn');
+  var bar   = document.getElementById('bar');
+  var mBtn  = document.getElementById('muteBtn');
+  var vol   = document.getElementById('vol');
+  var vWrap = document.getElementById('volWrap');
+  var fsBtn = document.getElementById('fsBtn');
 
-  function _kill() {
-    // Destroy the HLS instance immediately to stop ALL network requests.
-    if (window._hls) { try { window._hls.destroy(); } catch(e){} window._hls = null; }
-    var v = document.getElementById('v');
-    if (v) { v.removeAttribute('src'); v.load(); }
-    // Replace the page content so the Network tab shows nothing.
-    document.body.innerHTML = '<div style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;color:#ccff00;font-size:15px;font-weight:600;font-family:sans-serif;letter-spacing:.05em">PLAYBACK STOPPED</div>';
-  }
+  // ─── State ─────────────────────────────────────────────────────────────────
+  var playing = true;
+  var muted   = true;
+  var volume  = 0.5;
+  var uiVis   = false;
+  var idleTimer = null;
 
-  function _startGuard() {
-    if (_guardActive) return;
-    _guardActive = true;
+  // ─── UI sync helpers ───────────────────────────────────────────────────────
+  function setIcon(el, h) { el.innerHTML = h; }
 
-    // 1. Disable right-click.
-    document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+  function showSpin(v) { spin.classList.toggle('show', v); }
 
-    // 2. Window-dimension heuristic — only run when NOT inside an iframe.
-    //    When loaded inside an iframe (Account 3), outerWidth includes the parent
-    //    page chrome so the check would always fire a false positive.
-    var _isIframe = window.self !== window.top;
-    if (!_isIframe) {
-      setInterval(function() {
-        if ((window.outerWidth  - window.innerWidth  > 160) ||
-            (window.outerHeight - window.innerHeight > 160)) {
-          _kill();
-        }
-      }, 800);
-    }
+  function showErr(msg) { errM.textContent = msg; err.classList.add('show'); showSpin(false); }
 
-    // 3. debugger timing trap — catches DevTools even when breakpoints are off.
-    //    Skip on mobile (no DevTools threat there).
-    var _isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-    if (!_isMobile) {
-      setInterval(function() {
-        var t0 = performance.now();
-        // eslint-disable-next-line no-debugger
-        debugger; // jshint ignore:line
-        if (performance.now() - t0 > 120) _kill();
-      }, 1200);
-    }
-  }
+  function syncMute() { setIcon(mBtn, muted || volume === 0 ? ICON.mute : ICON.sound); vol.value = muted ? 0 : volume; }
 
-  // ─── STREAM LOADING ─────────────────────────────────────────────────────────
-  function _buildProxyUrl(channelSlug) {
-    var raw = 'https://inproviszon.st/' + channelSlug + '.m3u8';
-    var base = (typeof PUBLIC_API === 'string' && PUBLIC_API.indexOf('%%') === -1)
-      ? PUBLIC_API
-      : '';
-    if (!base) return raw;
-    return base + '/api/public/proxy-playlist?url=' + encodeURIComponent(raw);
-  }
+  function syncPlay() { setIcon(pBtn, playing ? ICON.pause : ICON.play); }
 
-  function _getSlug() {
-    var params = new URLSearchParams(window.location.search);
-    return (params.get('ch') || '').replace(/[^a-zA-Z0-9_-]/g, '').trim();
-  }
+  function syncFs() { setIcon(fsBtn, document.fullscreenElement ? ICON.shrink : ICON.expand); }
 
-  // ─── PLAYER STATE ────────────────────────────────────────────────────────────
-  var _playing = true;
-  var _muted = true; // matches video's muted attribute for autoplay
-  var _volume = 0.5;
-  var _uiVisible = false;
-  var _idleTimer = null;
-
-  var vEl      = document.getElementById('v');
-  var spinner  = document.getElementById('spinner');
-  var centerEl = document.getElementById('center');
-  var playBtn  = document.getElementById('playBtn');
-  var errEl    = document.getElementById('err');
-  var errMsg   = document.getElementById('errMsg');
-  var bar      = document.getElementById('bar');
-  var muteBtn  = document.getElementById('muteBtn');
-  var volSldr  = document.getElementById('vol');
-  var volWrap  = document.getElementById('volWrap');
-  var fsBtn    = document.getElementById('fsBtn');
-
-  function _setIcon(el, html) { el.innerHTML = html; }
-
-  function _showSpinner(v) {
-    spinner.classList.toggle('show', v);
-  }
-
-  function _showError(msg) {
-    errMsg.textContent = msg || 'Stream unavailable';
-    errEl.classList.add('show');
-    _showSpinner(false);
-  }
-
-  function _syncMuteUI() {
-    _setIcon(muteBtn, _muted || _volume === 0 ? ICON.mute : ICON.sound);
-    volSldr.value = _muted ? 0 : _volume;
-  }
-
-  function _syncPlayUI() {
-    _setIcon(playBtn, _playing ? ICON.pause : ICON.play);
-  }
-
-  function _syncFsUI() {
-    _setIcon(fsBtn, document.fullscreenElement ? ICON.shrink : ICON.expand);
-  }
-
-  // ── UI idle timer ─────────────────────────────────────────────────────────
-  function _showUi() {
-    _uiVisible = true;
+  function showUi() {
+    if (uiVis) return;
+    uiVis = true;
     bar.classList.add('show');
-    centerEl.classList.add('show');
-    clearTimeout(_idleTimer);
-    clearTimeout(_centerTimer);
-    if (_playing) {
-      _idleTimer = setTimeout(function() {
-        _hideUi();
+    ctr.classList.add('show');
+    clearTimeout(idleTimer);
+    if (playing) {
+      idleTimer = setTimeout(function() {
+        uiVis = false;
+        bar.classList.remove('show');
+        ctr.classList.remove('show');
       }, 4000);
     }
   }
 
-  function _hideUi() {
-    _uiVisible = false;
+  function hideUi() {
+    uiVis = false;
     bar.classList.remove('show');
-    if (_playing) centerEl.classList.remove('show');
+    ctr.classList.remove('show');
+    clearTimeout(idleTimer);
   }
 
-  function toggleUI(e) {
-    if (playBtn.contains(e.target) || bar.contains(e.target) || volWrap.contains(e.target)) return;
-    if (_uiVisible) {
-      _hideUi();
+  // ─── Click handlers (NativeHlsPlayer pattern) ─────────────────────────────
+  // Tapping the container (not on buttons/controls) toggles UI visibility
+  root.addEventListener('click', function(e) {
+    // If click is on a button or inside controls, ignore
+    if (e.target.closest('button') || e.target.closest('#volWrap') || e.target.closest('#vol') || e.target.closest('#live')) return;
+    if (uiVis) {
+      hideUi();
     } else {
-      _showUi();
+      showUi();
     }
-  }
+  });
 
-  var videoArea = vEl.parentElement;
-  videoArea.addEventListener('click', toggleUI);
-  videoArea.addEventListener('mousemove', function() { if (!_uiVisible) _showUi(); });
-  videoArea.addEventListener('mouseleave', function() { if (_playing) _hideUi(); });
+  // Desktop: mouse move shows UI
+  root.addEventListener('mousemove', function() {
+    if (!uiVis) showUi();
+  });
+  root.addEventListener('mouseleave', function() {
+    if (playing) hideUi();
+  });
 
-  // ── Play / Pause button ────────────────────────────────────────────────────
-  playBtn.addEventListener('click', function(e) {
+  // ─── Play / Pause ──────────────────────────────────────────────────────────
+  pBtn.addEventListener('click', function(e) {
     e.stopPropagation();
-    if (_playing) {
+    if (playing) {
       if (window._hls) window._hls.stopLoad();
-      vEl.pause();
-      _playing = false;
+      v.pause();
+      playing = false;
     } else {
-      _showSpinner(true);
+      showSpin(true);
       if (window._hls) {
         window._hls.startLoad();
-        if (window._hls.liveSyncPosition !== null) vEl.currentTime = window._hls.liveSyncPosition;
+        if (window._hls.liveSyncPosition !== null) v.currentTime = window._hls.liveSyncPosition;
       }
-      vEl.play().catch(function(){});
-      _playing = true;
+      v.play().catch(function(){});
+      playing = true;
     }
-    _syncPlayUI();
-    _showUi();
+    syncPlay();
+    showUi();
   });
 
-  // ── Volume / Mute ─────────────────────────────────────────────────────────
-  muteBtn.addEventListener('click', function(e) {
+  // ─── Mute / Volume ──────────────────────────────────────────────────────────
+  mBtn.addEventListener('click', function(e) {
     e.stopPropagation();
-    _muted = !_muted;
-    vEl.muted = _muted;
-    if (!_muted && _volume === 0) { _volume = 0.5; vEl.volume = 0.5; }
-    _syncMuteUI();
-    _showUi();
+    muted = !muted;
+    v.muted = muted;
+    if (!muted && volume === 0) { volume = 0.5; v.volume = 0.5; }
+    syncMute();
+    showUi();
   });
 
-  volSldr.addEventListener('input', function(e) {
+  vol.addEventListener('input', function(e) {
     e.stopPropagation();
-    _volume = parseFloat(this.value);
-    vEl.volume = _volume;
-    vEl.muted = _volume === 0;
-    _muted = _volume === 0;
-    _syncMuteUI();
+    volume = parseFloat(this.value);
+    v.volume = volume;
+    v.muted = volume === 0;
+    muted = volume === 0;
+    syncMute();
   });
-  volSldr.addEventListener('click', function(e) { e.stopPropagation(); });
+  vol.addEventListener('click', function(e) { e.stopPropagation(); });
 
-  // ── Fullscreen ─────────────────────────────────────────────────────────────
+  // Show volume slider on mute button long-press / tap
+  mBtn.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    vWrap.classList.toggle('open');
+  });
+  // Close vol wrap when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.bar-left')) vWrap.classList.remove('open');
+  });
+
+  // ─── Fullscreen ────────────────────────────────────────────────────────────
   fsBtn.addEventListener('click', function(e) {
     e.stopPropagation();
     if (!document.fullscreenElement) {
-      document.getElementById('root').requestFullscreen().catch(function(){});
+      root.requestFullscreen().catch(function(){});
     } else {
       document.exitFullscreen().catch(function(){});
     }
-    _showUi();
+    showUi();
   });
-  document.addEventListener('fullscreenchange', _syncFsUI);
+  document.addEventListener('fullscreenchange', syncFs);
 
-  // ── Video events ───────────────────────────────────────────────────────────
-  vEl.addEventListener('waiting', function() { _showSpinner(true); });
-  vEl.addEventListener('playing', function() { _showSpinner(false); _playing = true; _syncPlayUI(); });
-  vEl.addEventListener('canplay', function() { _showSpinner(false); });
-  vEl.addEventListener('pause',   function() { _playing = false; _syncPlayUI(); });
+  // ─── Video events ──────────────────────────────────────────────────────────
+  v.addEventListener('waiting', function() { showSpin(true); });
+  v.addEventListener('playing', function() { showSpin(false); playing = true; syncPlay(); });
+  v.addEventListener('canplay',  function() { showSpin(false); });
+  v.addEventListener('pause',    function() { playing = false; syncPlay(); });
 
-  // ─── INIT ────────────────────────────────────────────────────────────────────
+  // ─── Security guard ────────────────────────────────────────────────────────
+  document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+  var isIframe = window.self !== window.top;
+  if (!isIframe) {
+    setInterval(function() {
+      if ((window.outerWidth - window.innerWidth > 160) ||
+          (window.outerHeight - window.innerHeight > 160)) {
+        if (window._hls) { try { window._hls.destroy(); } catch(e){} window._hls = null; }
+        v.removeAttribute('src'); v.load();
+        document.body.innerHTML = '<div style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;color:#ccff00;font-size:15px;font-weight:600;font-family:sans-serif;letter-spacing:.05em">PLAYBACK STOPPED</div>';
+      }
+    }, 800);
+  }
+  var isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  if (!isMobile) {
+    setInterval(function() {
+      var t0 = performance.now();
+      debugger;
+      if (performance.now() - t0 > 120) {
+        if (window._hls) { try { window._hls.destroy(); } catch(e){} window._hls = null; }
+        v.removeAttribute('src'); v.load();
+        document.body.innerHTML = '<div style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;color:#ccff00;font-size:15px;font-weight:600;font-family:sans-serif;letter-spacing:.05em">PLAYBACK STOPPED</div>';
+      }
+    }, 1200);
+  }
+
+  // ─── PROXY URL ─────────────────────────────────────────────────────────────
+  function buildUrl(slug) {
+    var raw = 'https://inproviszon.st/' + slug + '.m3u8';
+    return PUBLIC_API.indexOf('%%') === -1
+      ? PUBLIC_API + '/api/public/proxy-playlist?url=' + encodeURIComponent(raw)
+      : raw;
+  }
+
+  function getSlug() {
+    var p = new URLSearchParams(window.location.search);
+    return (p.get('ch') || '').replace(/[^a-zA-Z0-9_-]/g, '').trim();
+  }
+
+  // ─── INIT ──────────────────────────────────────────────────────────────────
   function init() {
-    _startGuard();
-    var slug = _getSlug();
-    if (!slug) { _showError('No channel specified. Add ?ch=channel-slug to the URL.'); return; }
+    var slug = getSlug();
+    if (!slug) { showErr('No channel. Add ?ch=slug'); return; }
 
-    _streamUrl = _buildProxyUrl(slug);
+    var url = buildUrl(slug);
 
-    // Set initial UI state
-    _syncMuteUI();
-    _syncPlayUI();
-    _syncFsUI();
-    _showUi();
+    syncMute(); syncPlay(); syncFs();
+    showUi();
 
-    // Start HLS.
     if (Hls.isSupported()) {
       var hls = new Hls({ enableWorker: true, lowLatencyMode: true });
       window._hls = hls;
@@ -392,31 +350,29 @@
       hls.on(Hls.Events.ERROR, function(e, data) {
         if (data.fatal) {
           if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-            _showError('Stream unreachable. Check the channel slug or try again.');
+            showErr('Stream unreachable.');
           } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
             hls.recoverMediaError();
           } else {
-            _showError('Fatal playback error: ' + data.details);
+            showErr(data.details);
           }
         }
       });
 
       hls.on(Hls.Events.MANIFEST_PARSED, function() {
-        _showSpinner(false);
-        _hideUi();
-        vEl.play().catch(function() {});
+        showSpin(false);
+        v.play().catch(function(){});
       });
 
-      hls.attachMedia(vEl);
+      hls.attachMedia(v);
       hls.on(Hls.Events.MEDIA_ATTACHED, function() {
-        hls.loadSource(_streamUrl);
+        hls.loadSource(url);
       });
-
-    } else if (vEl.canPlayType('application/vnd.apple.mpegurl')) {
-      vEl.src = _streamUrl;
-      vEl.play().catch(function() {});
+    } else if (v.canPlayType('application/vnd.apple.mpegurl')) {
+      v.src = url;
+      v.play().catch(function(){});
     } else {
-      _showError('HLS playback is not supported in this browser.');
+      showErr('HLS not supported.');
     }
   }
 
@@ -425,7 +381,6 @@
   } else {
     init();
   }
-
 }());
 </script>
 </body>
