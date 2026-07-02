@@ -118,16 +118,14 @@
 <div id="root">
   <!-- Video area -->
   <div id="videoWrap">
-    <video id="v" autoplay playsinline></video>
-    <div id="shield"></div>
+    <video id="v" autoplay playsinline muted></video>
 
     <!-- buffering spinner -->
     <div id="spinner" class="show"></div>
 
-    <!-- center play/pause button -->
+    <!-- center play/pause overlay — click on overlay area toggles UI, click button toggles play -->
     <div id="center">
-      <button id="playBtn" aria-label="Play / Pause">
-      </button>
+      <button id="playBtn" aria-label="Play / Pause"></button>
     </div>
 
     <!-- error overlay -->
@@ -239,13 +237,13 @@
 
   // ─── PLAYER STATE ────────────────────────────────────────────────────────────
   var _playing = true;
-  var _muted = true;
+  var _muted = true; // matches video's muted attribute for autoplay
   var _volume = 0.5;
   var _uiVisible = false;
   var _centerTimer = null;
+  var _idleTimer = null;
 
   var vEl      = document.getElementById('v');
-  var shield   = document.getElementById('shield');
   var spinner  = document.getElementById('spinner');
   var centerEl = document.getElementById('center');
   var playBtn  = document.getElementById('playBtn');
@@ -254,6 +252,7 @@
   var bar      = document.getElementById('bar');
   var muteBtn  = document.getElementById('muteBtn');
   var volSldr  = document.getElementById('vol');
+  var volWrap  = document.getElementById('volWrap');
   var fsBtn    = document.getElementById('fsBtn');
 
   function _setIcon(el, html) { el.innerHTML = html; }
@@ -305,31 +304,23 @@
     }, 5000);
   }
 
-  function handleShieldClick(e) {
-    e.stopPropagation();
-    if (e.type === 'touchstart') e.preventDefault(); // Prevent double firing
-    if (!_uiVisible) {
-      _showUi();
-      _showCenter();
-    } else {
-      _hideUi();
+  function handleContainerClick(e) {
+    // Ignore clicks on the play button itself or controls
+    if (playBtn.contains(e.target) || bar.contains(e.target) || volWrap.contains(e.target)) return;
+    if (_playing) {
+      if (_uiVisible) {
+        _hideUi();
+      } else {
+        _showUi();
+        _showCenter();
+      }
     }
   }
 
-  // Support both click and touchstart for immediate response on mobile
-  shield.addEventListener('click', handleShieldClick);
-  shield.addEventListener('touchstart', handleShieldClick, { passive: false });
-  
-  // Allow clicking the overlay background itself to dismiss UI, but not if clicking the play button
-  centerEl.addEventListener('click', function(e) {
-    if (e.target === centerEl && _playing) _hideUi();
-  });
-  centerEl.addEventListener('touchstart', function(e) {
-    if (e.target === centerEl && _playing) { e.preventDefault(); _hideUi(); }
-  }, { passive: false });
-
-  document.getElementById('root').addEventListener('mousemove', _showUi);
-  document.getElementById('root').addEventListener('mouseleave', function() {
+  // Click on the video area toggles UI visibility
+  vEl.parentElement.addEventListener('click', handleContainerClick);
+  vEl.parentElement.addEventListener('mousemove', _showUi);
+  vEl.parentElement.addEventListener('mouseleave', function() {
     if (_playing) _hideUi();
   });
 
@@ -373,6 +364,14 @@
     _syncMuteUI();
   });
 
+  muteBtn.addEventListener('touchstart', function(e) {
+    e.stopPropagation();
+    _muted = !_muted;
+    vEl.muted = _muted;
+    if (!_muted && _volume === 0) { _volume = 0.5; vEl.volume = 0.5; }
+    _syncMuteUI();
+  });
+
   volSldr.addEventListener('input', function(e) {
     e.stopPropagation();
     _volume = parseFloat(this.value);
@@ -393,6 +392,16 @@
       document.exitFullscreen().catch(function(){});
     }
   });
+
+  fsBtn.addEventListener('touchstart', function(e) {
+    e.stopPropagation();
+    if (!document.fullscreenElement) {
+      document.getElementById('root').requestFullscreen().catch(function(){});
+    } else {
+      document.exitFullscreen().catch(function(){});
+    }
+  });
+
   document.addEventListener('fullscreenchange', _syncFsUI);
 
   // ── Video events ───────────────────────────────────────────────────────────
