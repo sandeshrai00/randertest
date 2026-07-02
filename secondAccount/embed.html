@@ -13,24 +13,6 @@
     #root { position: relative; width: 100%; height: 100%; background: #0f0f13;
       display: flex; flex-direction: column; }
 
-    /* top bar: channel info */
-    #topBar { display: flex; align-items: center; gap: 10px; padding: 8px 14px;
-               background: #1a1a24; border-bottom: 1px solid #2d2d3a;
-               min-height: 48px; flex-shrink: 0; }
-    #topLogo { width: 28px; height: 28px; border-radius: 50%; object-fit: cover;
-               background: #2d2d3a; flex-shrink: 0; }
-    #topName { font-size: 14px; font-weight: 700; color: #f0f0f0; white-space: nowrap;
-               overflow: hidden; text-overflow: ellipsis; }
-    #topStatus { font-size: 11px; font-weight: 600;
-                 display: flex; align-items: center; gap: 5px;
-                 margin-left: auto; flex-shrink: 0; }
-    #statusDot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    #statusDot.live { background: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.4); }
-    #statusDot.offline { background: #ef4444; }
-    .statusLabel { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
-    .statusLabel.live { color: #10b981; }
-    .statusLabel.offline { color: #ef4444; }
-
     /* video wrapper — fills remaining space */
     #videoWrap { flex: 1; position: relative; background: #000; min-height: 0; }
 
@@ -102,29 +84,9 @@
     #err.show { display: flex; }
     #errIcon { font-size: 2.5rem; }
 
-    /* unmute hint */
-    #unmute { position: absolute; top: 14px; left: 14px; z-index: 25;
-              display: none; align-items: center; gap: 8px;
-              padding: 10px 18px; border-radius: 50px; cursor: pointer;
-              background: rgba(255,255,255,0.12); backdrop-filter: blur(10px);
-              border: 1px solid rgba(255,255,255,0.2); color: #fff;
-              font-size: 13px; font-weight: 600; }
-    #unmute.show { display: flex; }
-
-    /* telemetry row */
-    #telemetry { display: flex; align-items: center; gap: 12px;
-                 padding: 4px 14px; background: #1a1a24; flex-shrink: 0; }
-    .pill { display: flex; align-items: center; gap: 4px;
-            font-size: 10px; font-weight: 600; color: #a1a1aa; white-space: nowrap; }
-    .pill svg { width: 12px; height: 12px; }
-    .pillVal { color: #f0f0f0; font-weight: 500; }
+    /* error overlay */
 
     @media (max-width: 600px) {
-      #topBar { padding: 6px 10px; min-height: 40px; }
-      #topLogo { width: 22px; height: 22px; }
-      #topName { font-size: 12px; }
-      #telemetry { gap: 8px; padding: 3px 10px; }
-      .pill { font-size: 9px; }
       #bar { height: 38px; padding: 6px 10px; }
       #playBtn { width: 48px; height: 48px; }
       #vol { width: 56px; }
@@ -133,16 +95,6 @@
 </head>
 <body>
 <div id="root">
-  <!-- Top bar: channel info -->
-  <div id="topBar">
-    <img id="topLogo" src="" alt="" />
-    <span id="topName">Loading...</span>
-    <div id="topStatus">
-      <div id="statusDot"></div>
-      <span class="statusLabel" id="statusLabel">Checking</span>
-    </div>
-  </div>
-
   <!-- Video area -->
   <div id="videoWrap">
     <video id="v" autoplay playsinline></video>
@@ -155,20 +107,6 @@
     <div id="center">
       <button id="playBtn" aria-label="Play / Pause">
       </button>
-    </div>
-
-    <!-- unmute hint -->
-    <div id="unmute" role="button" aria-label="Click to Unmute">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508
-          c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121
-          1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5
-          c.945.945 2.561.276 2.561-1.06V4.06zM17.78 9.22a.75.75 0
-          10-1.06 1.06L18.44 12l-1.72 1.72a.75.75 0 001.06 1.06l1.72-1.72
-          1.72 1.72a.75.75 0 101.06-1.06L20.56 12l1.72-1.72a.75.75 0
-          00-1.06-1.06l-1.72 1.72-1.72-1.72z"/>
-      </svg>
-      Click to Unmute
     </div>
 
     <!-- error overlay -->
@@ -191,14 +129,6 @@
         </button>
       </div>
     </div>
-  </div>
-
-  <!-- Telemetry bar -->
-  <div id="telemetry">
-    <div class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="pillVal" id="telRes">N/A</span></div>
-    <div class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg><span class="pillVal" id="telBitrate">Auto</span></div>
-    <div class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span class="pillVal" id="telLevels">0</span></div>
-    <div class="pill" style="margin-left:auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M12 6v6l4 2"/></svg><span class="pillVal" id="telDelay">0ms</span></div>
   </div>
 </div>
 
@@ -285,44 +215,6 @@
     return (params.get('ch') || '').replace(/[^a-zA-Z0-9_-]/g, '').trim();
   }
 
-  // ─── CHANNEL INFO ───────────────────────────────────────────────────────────
-  function fetchChannelInfo(slug) {
-    var t = document.getElementById('topLogo');
-    var n = document.getElementById('topName');
-    var base = (typeof PUBLIC_API === 'string' && PUBLIC_API.indexOf('%%') === -1)
-      ? PUBLIC_API : '';
-    if (!base) return;
-    fetch(base + '/api/public/channel?slug=' + encodeURIComponent(slug))
-      .then(function(r) { return r.ok ? r.json() : null; })
-      .then(function(d) {
-        if (d && d.name) {
-          n.textContent = d.name + (d.stream_name ? ' — ' + d.stream_name : '');
-          if (d.logo_url) { t.src = d.logo_url; }
-        }
-      })
-      .catch(function() {});
-  }
-
-  function updateStats(hls) {
-    var telRes = document.getElementById('telRes');
-    var telBitrate = document.getElementById('telBitrate');
-    var telLevels = document.getElementById('telLevels');
-    var telDelay = document.getElementById('telDelay');
-    if (!hls) return;
-    var levels = hls.levels || [];
-    var cur = hls.currentLevel;
-    if (levels.length > 0 && cur >= 0) {
-      var l = levels[cur];
-      telRes.textContent = (l.width || '?') + 'x' + (l.height || '?');
-      telBitrate.textContent = l.bitrate ? (Math.round(l.bitrate / 1000) + ' kbps') : 'Auto';
-    }
-    telLevels.textContent = levels.length + ' Lvl';
-    var latency = hls.latency;
-    if (latency != null) {
-      telDelay.textContent = Math.round(latency * 1000) + 'ms';
-    }
-  }
-
   // ─── PLAYER STATE ────────────────────────────────────────────────────────────
   var _playing = true;
   var _muted = true;
@@ -335,7 +227,6 @@
   var spinner  = document.getElementById('spinner');
   var centerEl = document.getElementById('center');
   var playBtn  = document.getElementById('playBtn');
-  var unmuteEl = document.getElementById('unmute');
   var errEl    = document.getElementById('err');
   var errMsg   = document.getElementById('errMsg');
   var bar      = document.getElementById('bar');
@@ -358,7 +249,6 @@
   function _syncMuteUI() {
     _setIcon(muteBtn, _muted || _volume === 0 ? ICON.mute : ICON.sound);
     volSldr.value = _muted ? 0 : _volume;
-    unmuteEl.classList.toggle('show', _muted);
   }
 
   function _syncPlayUI() {
@@ -458,14 +348,6 @@
 
   volSldr.addEventListener('click', function(e) { e.stopPropagation(); });
 
-  unmuteEl.addEventListener('click', function(e) {
-    e.stopPropagation();
-    _muted = false;
-    vEl.muted = false;
-    if (_volume === 0) { _volume = 0.5; vEl.volume = 0.5; }
-    _syncMuteUI();
-  });
-
   // ── Fullscreen ─────────────────────────────────────────────────────────────
   fsBtn.addEventListener('click', function(e) {
     e.stopPropagation();
@@ -488,9 +370,6 @@
     _startGuard();
     var slug = _getSlug();
     if (!slug) { _showError('No channel specified. Add ?ch=channel-slug to the URL.'); return; }
-
-    // Fetch channel info for top bar
-    fetchChannelInfo(slug);
 
     _streamUrl = _buildProxyUrl(slug);
 
@@ -522,19 +401,6 @@
         _showSpinner(false);
         _hideUi();
         vEl.play().catch(function() {});
-
-        // Update status dot to LIVE
-        document.getElementById('statusDot').className = 'live';
-        document.getElementById('statusLabel').textContent = 'LIVE';
-        document.getElementById('statusLabel').className = 'statusLabel live';
-
-        // Start telemetry refresh
-        setInterval(function() { updateStats(hls); }, 2000);
-        updateStats(hls);
-      });
-
-      hls.on(Hls.Events.LEVEL_LOADED, function() {
-        updateStats(hls);
       });
 
       hls.attachMedia(vEl);
