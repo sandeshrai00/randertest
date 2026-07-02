@@ -58,7 +58,7 @@
   background: #000;
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.04);
 }
 
 .iframe {
@@ -81,12 +81,19 @@
 /* ── Stream switcher ─────────────────────────────────── */
 .streams {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
+  overflow-x: auto;
   padding: 4px 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.streams::-webkit-scrollbar {
+  display: none;
 }
 
 .streamBtn {
+  flex-shrink: 0;
   padding: 8px 18px;
   border-radius: 999px;
   border: 1px solid var(--border);
