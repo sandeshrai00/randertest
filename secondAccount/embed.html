@@ -23,48 +23,66 @@
     /* click shield */
     #shield { position: absolute; inset: 0; z-index: 10; cursor: default; }
 
+    /* center play/pause */
+    #center { position: absolute; inset: 0; z-index: 25;
+              display: flex; align-items: center; justify-content: center;
+              background: rgba(0,0,0,0);
+              opacity: 0; pointer-events: none;
+              transition: opacity 0.3s ease, background 0.3s ease; }
+    #center.show { opacity: 1; pointer-events: auto; background: rgba(0,0,0,0.4); }
+    #playBtn { width: 72px; height: 72px; border-radius: 50%; border: none;
+               background: rgba(204, 255, 0, 0.9); color: #000; cursor: pointer;
+               display: flex; align-items: center; justify-content: center;
+               box-shadow: 0 8px 32px rgba(204, 255, 0, 0.4); transition: background 0.2s ease; }
+    #center.show #playBtn:hover { background: rgba(204, 255, 0, 1); }
+    #playBtn svg { width: 40px; height: 40px; }
+
     /* bottom control bar */
     #bar { position: absolute; bottom: 0; left: 0; right: 0; z-index: 20;
            display: flex; align-items: center; justify-content: space-between;
-           padding: 8px 14px; height: 44px;
-           background: linear-gradient(transparent, rgba(0,0,0,0.92));
-           opacity: 0; transition: opacity 0.25s ease; pointer-events: none; }
-    #bar.show { opacity: 1; pointer-events: auto; }
+           padding: 40px 20px 20px 20px;
+           background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+           opacity: 0; transform: translateY(20px); transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; }
+    #bar.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
-    .bar-left, .bar-right { display: flex; align-items: center; gap: 10px; }
+    .bar-left, .bar-right { display: flex; align-items: center; gap: 16px; }
 
     /* icon buttons */
     .ibtn { background: none; border: none; color: #ccff00; cursor: pointer;
-            padding: 6px; border-radius: 6px; display: flex; align-items: center;
-            justify-content: center; transition: background 0.15s; }
-    .ibtn:hover { background: rgba(204,255,0,0.12); }
+            padding: 8px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); outline: none; }
+    .ibtn:hover { transform: scale(1.15); filter: drop-shadow(0 0 8px rgba(204, 255, 0, 0.4)); }
+    .ibtn svg { width: 24px; height: 24px; }
+    #fsBtn svg { width: 20px; height: 20px; }
 
-    /* volume slider */
-    #vol { -webkit-appearance: none; appearance: none;
-           width: 72px; height: 4px; border-radius: 2px;
-           background: rgba(255,255,255,0.25); outline: none; cursor: pointer; }
-    #vol::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px;
-           border-radius: 50%; background: #ccff00; cursor: pointer; }
-    #vol::-moz-range-thumb { width: 13px; height: 13px; border-radius: 50%;
-           background: #ccff00; cursor: pointer; border: none; }
+    /* volume UI */
+    .bar-left { position: relative; } /* Anchor for absolute popup slider */
+    #volWrap { position: absolute; bottom: 100%; left: 16px; transform: translateX(-50%) translateY(10px);
+               height: 0; width: 24px; overflow: hidden;
+               transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s ease, opacity 0.3s ease;
+               opacity: 0; display: flex; justify-content: center; align-items: center;
+               margin-bottom: 8px; pointer-events: none; }
+    .bar-left:hover #volWrap { height: 90px; transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+    
+    #vol { -webkit-appearance: none; appearance: none; width: 80px; height: 8px;
+           background: rgba(255, 255, 255, 0.4); border-radius: 4px; outline: none;
+           cursor: pointer; transform: rotate(-90deg); }
+    #vol::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px;
+           border-radius: 50%; background: #ccff00; cursor: pointer;
+           box-shadow: 0 2px 6px rgba(204, 255, 0, 0.5); transition: transform 0.2s ease; }
+    #vol::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; border: none;
+           background: #ccff00; cursor: pointer; box-shadow: 0 2px 6px rgba(204, 255, 0, 0.5); }
+    #vol::-webkit-slider-thumb:hover { transform: scale(1.2); box-shadow: 0 2px 10px rgba(204, 255, 0, 0.8); }
 
     /* LIVE badge */
-    #live { display: flex; align-items: center; gap: 5px;
-            font-size: 11px; font-weight: 700; letter-spacing: 0.05em; color: #ccff00; }
-    #liveDot { width: 7px; height: 7px; border-radius: 50%; background: #ccff00;
-               animation: pulse 1.8s ease-in-out infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-    /* center play/pause */
-    #center { position: absolute; top: 50%; left: 50%; z-index: 25;
-              transform: translate(-50%,-50%);
-              opacity: 0; pointer-events: none;
-              transition: opacity 0.2s ease; }
-    #center.show { opacity: 1; pointer-events: auto; }
-    #playBtn { width: 56px; height: 56px; border-radius: 50%; border: none;
-               background: #ccff00; color: #000; cursor: pointer;
-               display: flex; align-items: center; justify-content: center;
-               box-shadow: 0 0 22px rgba(204,255,0,0.35); }
+    #live { display: flex; align-items: center; gap: 8px;
+            font-size: 14px; font-weight: 700; letter-spacing: 1px; color: #ccff00;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8); }
+    #liveDot { width: 8px; height: 8px; border-radius: 50%; background: #ccff00;
+               animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(204, 255, 0, 0.7); }
+                       70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(204, 255, 0, 0); }
+                       100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(204, 255, 0, 0); } }
 
     /* spinner */
     #spinner { position: absolute; top: 50%; left: 50%; z-index: 30;
@@ -87,9 +105,12 @@
     /* error overlay */
 
     @media (max-width: 600px) {
-      #bar { height: 38px; padding: 6px 10px; }
-      #playBtn { width: 48px; height: 48px; }
-      #vol { width: 56px; }
+      #bar { padding: 30px 10px 10px 10px; }
+      #playBtn { width: 56px; height: 56px; }
+      #playBtn svg { width: 32px; height: 32px; }
+      .bar-left, .bar-right { gap: 10px; }
+      #live { font-size: 12px; }
+      #liveDot { width: 6px; height: 6px; }
     }
   </style>
 </head>
@@ -120,8 +141,9 @@
       <div class="bar-left">
         <button class="ibtn" id="muteBtn" aria-label="Mute / Unmute">
         </button>
-        <input type="range" id="vol" min="0" max="1" step="0.05" value="0.5"
-               aria-label="Volume" />
+        <div id="volWrap">
+          <input type="range" id="vol" min="0" max="1" step="0.05" value="0.5" aria-label="Volume" />
+        </div>
       </div>
       <div class="bar-right">
         <div id="live"><div id="liveDot"></div>LIVE</div>
@@ -283,16 +305,28 @@
     }, 5000);
   }
 
-  // ── Click on shield: reveal center button (does NOT pause) ─────────────────
-  shield.addEventListener('click', function(e) {
+  function handleShieldClick(e) {
     e.stopPropagation();
+    if (e.type === 'touchstart') e.preventDefault(); // Prevent double firing
     if (!_uiVisible) {
       _showUi();
       _showCenter();
     } else {
       _hideUi();
     }
+  }
+
+  // Support both click and touchstart for immediate response on mobile
+  shield.addEventListener('click', handleShieldClick);
+  shield.addEventListener('touchstart', handleShieldClick, { passive: false });
+  
+  // Allow clicking the overlay background itself to dismiss UI, but not if clicking the play button
+  centerEl.addEventListener('click', function(e) {
+    if (e.target === centerEl && _playing) _hideUi();
   });
+  centerEl.addEventListener('touchstart', function(e) {
+    if (e.target === centerEl && _playing) { e.preventDefault(); _hideUi(); }
+  }, { passive: false });
 
   document.getElementById('root').addEventListener('mousemove', _showUi);
   document.getElementById('root').addEventListener('mouseleave', function() {
@@ -309,6 +343,8 @@
       _playing = false;
       _syncPlayUI();
       _showUi(); // keep UI visible while paused
+      centerEl.classList.add('show'); // keep center button visible
+      if (_centerTimer) clearTimeout(_centerTimer);
     } else {
       // Resume: reconnect and jump to live edge.
       _showSpinner(true);
