@@ -91,8 +91,8 @@
   background-position: center;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding: 16px;
+  justify-content: space-between;
+  padding: 20px;
 }
 
 .finishedOverlay {
@@ -115,6 +115,17 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+.finishedMsg {
+  position: relative;
+  z-index: 2;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.6);
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  padding-bottom: 8px;
 }
 
 /* ── Stream switcher ─────────────────────────────────── */
@@ -266,12 +277,16 @@
   .finished {
     border-radius: 8px;
     border-width: 1px;
-    padding: 12px;
+    padding: 14px;
   }
 
   .finishedBadge {
     font-size: 0.7rem;
     padding: 4px 10px;
     border-width: 1px;
+  }
+
+  .finishedMsg {
+    font-size: 1rem;
   }
 }

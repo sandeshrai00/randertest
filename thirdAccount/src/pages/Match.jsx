@@ -92,6 +92,7 @@ export default function Match() {
             <div className={styles.finished} {...(match.logo_url ? { style: { backgroundImage: `url(${match.logo_url})` } } : {})}>
               <div className={styles.finishedOverlay} />
               <div className={styles.finishedBadge}>FINISHED</div>
+              <div className={styles.finishedMsg}>This match has concluded</div>
             </div>
             <div className={styles.info}>
               <div className={styles.infoTop}>
@@ -103,6 +104,7 @@ export default function Match() {
                 )}
               </div>
               <h1 className={styles.title}>{match.title}</h1>
+              <p className={styles.finishedMsg}>This match has concluded</p>
             </div>
           </>
         ) : (
