@@ -21,13 +21,9 @@
 .back:hover { color: var(--accent); }
 
 .logo {
-  font-size: 1.4rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: var(--text);
+  height: 32px;
+  width: auto;
 }
-
-.logoAccent { color: var(--accent); }
 
 .center {
   flex: 1;

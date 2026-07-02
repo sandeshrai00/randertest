@@ -51,9 +51,7 @@ export default function Match() {
     <div className={styles.page}>
       <header className={styles.header}>
         <Link to="/" className={styles.back}>← All Matches</Link>
-        <div className={styles.logo}>
-          <span className={styles.logoAccent}>S</span>oraScore
-        </div>
+        <img src="/logo.png" alt="SoraScore" className={styles.logo} />
       </header>
 
       {loading && (

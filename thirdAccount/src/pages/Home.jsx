@@ -28,9 +28,7 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <div className={styles.logo}>
-          <span className={styles.logoAccent}>S</span>oraScore
-        </div>
+        <img src="/logo.png" alt="SoraScore" className={styles.logo} />
         <p className={styles.tagline}>Free live sports streams</p>
       </header>
 

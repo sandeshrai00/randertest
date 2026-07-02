@@ -11,13 +11,9 @@
 }
 
 .logo {
-  font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: var(--text);
+  height: 40px;
+  width: auto;
 }
-
-.logoAccent { color: var(--accent); }
 
 .tagline {
   font-size: 14px;
