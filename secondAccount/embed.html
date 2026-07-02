@@ -102,7 +102,7 @@
 </head>
 <body>
 <div id="root">
-  <video id="v" autoplay playsinline muted></video>
+  <video id="v" autoplay playsinline></video>
 
   <div id="spinner" class="show"></div>
 
@@ -158,6 +158,15 @@
   var volume  = 0.5;
   var uiVis   = false;
   var idleTimer = null;
+
+  // ─── Persist mute/volume across channel switches ──────────────────────────
+  function savePrefs() { try { localStorage.setItem('ss_player', JSON.stringify({ muted: muted, volume: volume })); } catch(e){} }
+  function loadPrefs() {
+    try {
+      var d = JSON.parse(localStorage.getItem('ss_player'));
+      if (d) { muted = d.muted === true; volume = typeof d.volume === 'number' ? d.volume : 0.5; }
+    } catch(e){}
+  }
 
   // ─── UI sync helpers ───────────────────────────────────────────────────────
   function setIcon(el, h) { el.innerHTML = h; }
@@ -244,6 +253,7 @@
     v.muted = muted;
     if (!muted && volume === 0) { volume = 0.5; v.volume = 0.5; }
     syncMute();
+    savePrefs();
     showUi();
   });
 
@@ -254,6 +264,7 @@
     v.muted = volume === 0;
     muted = volume === 0;
     syncMute();
+    savePrefs();
   });
   vol.addEventListener('click', function(e) { e.stopPropagation(); });
 
@@ -321,6 +332,9 @@
 
     var url = buildUrl(slug);
 
+    loadPrefs();
+    v.muted = muted;
+    v.volume = volume;
     syncMute(); syncPlay(); syncFs();
     showUi();
 
