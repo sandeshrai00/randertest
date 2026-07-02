@@ -131,31 +131,27 @@
 }
 
 .badge {
-  background: var(--accent-dim);
-  color: var(--accent);
-  border: 1px solid rgba(204, 255, 0, 0.25);
-  border-radius: 999px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
-  padding: 2px 9px;
+  color: var(--accent);
   flex-shrink: 0;
 }
 
 .time {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-secondary);
 }
 
 .title {
-  font-size: 1.25rem;
+  font-size: 1.75rem;
   font-weight: 800;
   color: var(--text);
-  line-height: 1.25;
+  line-height: 1.2;
   letter-spacing: -0.02em;
 }
 
 .streamsCount {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-secondary);
 }
 
@@ -220,7 +216,7 @@
   }
 
   .title {
-    font-size: 1.1rem;
+    font-size: 1.35rem;
   }
 
   .streamBtn {
