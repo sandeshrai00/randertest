@@ -102,8 +102,11 @@ export default function Match() {
                 key={activeChannel}
                 src={embedUrl}
                 title={match.title}
+                width="100%"
+                height="100%"
                 frameBorder="0"
-                allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                scrolling="no"
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
                 allowFullScreen
                 className={styles.iframe}
               />
