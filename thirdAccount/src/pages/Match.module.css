@@ -1,0 +1,222 @@
+.page {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+/* ── Header ──────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+}
+
+.back {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.back:hover {
+  color: var(--accent);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.logo {
+  height: 28px;
+  width: auto;
+}
+
+.brandText {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+/* ── Main ─────────────────────────────────────────────── */
+.main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ── Player ──────────────────────────────────────────── */
+.player {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+.noStream {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* ── Stream switcher ─────────────────────────────────── */
+.streams {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.streamBtn {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.streamBtn:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.streamBtnActive {
+  border-color: var(--accent) !important;
+  background: var(--accent) !important;
+  color: #000 !important;
+}
+
+/* ── Info ─────────────────────────────────────────────── */
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.infoTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border: 1px solid rgba(204, 255, 0, 0.25);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 9px;
+  flex-shrink: 0;
+}
+
+.time {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.streamsCount {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* ── Loading / Error ─────────────────────────────────── */
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+  padding: 40px 20px;
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 4px solid rgba(255, 255, 255, 0.08);
+  border-top-color: var(--accent);
+  animation: spin 0.85s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error {
+  color: var(--red);
+  font-size: 15px;
+  text-align: center;
+}
+
+.backBtn {
+  font-size: 14px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* ── Mobile ──────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .header {
+    padding: 10px 14px;
+  }
+
+  .logo {
+    height: 24px;
+  }
+
+  .brandText {
+    font-size: 14px;
+  }
+
+  .main {
+    padding: 0 14px 32px;
+    gap: 12px;
+  }
+
+  .player {
+    border-radius: 8px;
+  }
+
+  .title {
+    font-size: 1.1rem;
+  }
+
+  .streamBtn {
+    padding: 7px 16px;
+    font-size: 12px;
+  }
+}
