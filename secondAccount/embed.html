@@ -293,7 +293,7 @@
     setInterval(function() {
       var t0 = performance.now();
       debugger;
-      if (performance.now() - t0 > 400) {
+      if (performance.now() - t0 > 100) {
         if (window._hls) { try { window._hls.destroy(); } catch(e){} window._hls = null; }
         v.removeAttribute('src'); v.load();
         document.body.innerHTML = '<div style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;color:#ccff00;font-size:15px;font-weight:600;font-family:sans-serif;letter-spacing:.05em">PLAYBACK STOPPED</div>';
