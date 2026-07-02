@@ -329,7 +329,7 @@
     showUi();
 
     if (Hls.isSupported()) {
-      var hls = new Hls({ enableWorker: true, lowLatencyMode: true, maxBufferLength: 60, maxMaxBufferLength: 120, maxBufferSize: 60 * 1000 * 1000 });
+      var hls = new Hls({ enableWorker: true, lowLatencyMode: true });
       window._hls = hls;
 
       hls.on(Hls.Events.ERROR, function(e, data) {
