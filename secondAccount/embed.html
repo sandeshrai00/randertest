@@ -57,7 +57,8 @@
            transition: opacity 0.25s ease, transform 0.25s ease; }
     #bar.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
-    .bar-left, .bar-right { display: flex; align-items: center; gap: 16px; }
+    .bar-left { display: flex; align-items: center; gap: 6px; }
+    .bar-right { display: flex; align-items: center; gap: 16px; }
     .bar-left { position: relative; }
 
     .ibtn { background: none; border: none; color: #ccff00; cursor: pointer;
@@ -67,26 +68,15 @@
     .ibtn svg { width: 26px; height: 26px; pointer-events: none; }
     #fsBtn svg { width: 22px; height: 22px; }
 
-    /* volume slider — pops up on hover/tap of mute area */
-    #volWrap { position: absolute; bottom: 100%; left: 16px;
-               transform: translateX(-50%);
-               height: 0; width: 40px; overflow: hidden;
-               opacity: 0; pointer-events: none;
-               transition: height 0.25s ease, opacity 0.25s ease;
-               margin-bottom: 8px;
-               display: flex; justify-content: center; align-items: center; }
-    .bar-left:hover #volWrap,
-    .bar-left:active #volWrap,
-    #volWrap.open { height: 120px; opacity: 1; pointer-events: auto; }
-    #vol { -webkit-appearance: none; appearance: none; width: 80px; height: 8px;
-           background: rgba(255,255,255,0.4); border-radius: 4px; outline: none;
-           cursor: pointer; transform: rotate(-90deg); touch-action: none; }
+    /* inline volume slider — always visible inside the bar */
+    #vol { -webkit-appearance: none; appearance: none; width: 50px; height: 4px;
+           background: rgba(255,255,255,0.3); border-radius: 4px; outline: none;
+           cursor: pointer; touch-action: none; }
     #vol::-webkit-slider-thumb { -webkit-appearance: none; appearance: none;
-           width: 18px; height: 18px; border-radius: 50%; background: #ccff00;
-           cursor: pointer; box-shadow: 0 2px 6px rgba(204,255,0,0.5); }
-    #vol::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%;
-           border: none; background: #ccff00; cursor: pointer;
-           box-shadow: 0 2px 6px rgba(204,255,0,0.5); }
+           width: 16px; height: 16px; border-radius: 50%; background: #ccff00;
+           cursor: pointer; border: none; }
+    #vol::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%;
+           border: none; background: #ccff00; cursor: pointer; }
 
     /* LIVE badge */
     #live { display: flex; align-items: center; gap: 8px;
@@ -103,6 +93,7 @@
       #playBtn svg { width: 32px; height: 32px; }
       #bar { padding: 30px 10px 12px; }
       .bar-left, .bar-right { gap: 10px; }
+      #vol { width: 40px; }
       .ibtn svg { width: 22px; height: 22px; }
       #fsBtn svg { width: 18px; height: 18px; }
       #live { font-size: 11px; }
@@ -124,9 +115,7 @@
   <div id="bar">
     <div class="bar-left">
       <button class="ibtn" id="muteBtn" aria-label="Mute/Unmute"></button>
-      <div id="volWrap">
-        <input type="range" id="vol" min="0" max="1" step="0.05" value="0.5" aria-label="Volume" />
-      </div>
+      <input type="range" id="vol" min="0" max="1" step="0.05" value="0.5" aria-label="Volume" />
     </div>
     <div class="bar-right">
       <div id="live"><div id="liveDot"></div>LIVE</div>
@@ -161,7 +150,6 @@
   var bar   = document.getElementById('bar');
   var mBtn  = document.getElementById('muteBtn');
   var vol   = document.getElementById('vol');
-  var vWrap = document.getElementById('volWrap');
   var fsBtn = document.getElementById('fsBtn');
 
   // ─── State ─────────────────────────────────────────────────────────────────
@@ -210,7 +198,7 @@
   // Tapping the container (not on buttons/controls) toggles UI visibility
   root.addEventListener('click', function(e) {
     // If click is on a button or inside controls, ignore
-    if (e.target.closest('button') || e.target.closest('#volWrap') || e.target.closest('#vol') || e.target.closest('#live')) return;
+    if (e.target.closest('button') || e.target.closest('#live')) return;
     if (uiVis) {
       hideUi();
     } else {
@@ -218,13 +206,16 @@
     }
   });
 
-  // Desktop: mouse move shows UI
-  root.addEventListener('mousemove', function() {
-    if (!uiVis) showUi();
-  });
-  root.addEventListener('mouseleave', function() {
-    if (playing) hideUi();
-  });
+  // Desktop only: mouse move shows UI (skip on touch devices to avoid conflict with click)
+  var isTouchDevice = 'ontouchstart' in window;
+  if (!isTouchDevice) {
+    root.addEventListener('mousemove', function() {
+      if (!uiVis) showUi();
+    });
+    root.addEventListener('mouseleave', function() {
+      if (playing) hideUi();
+    });
+  }
 
   // ─── Play / Pause ──────────────────────────────────────────────────────────
   pBtn.addEventListener('click', function(e) {
@@ -265,12 +256,6 @@
     syncMute();
   });
   vol.addEventListener('click', function(e) { e.stopPropagation(); });
-
-  // Show volume slider on mute button long-press / tap
-  mBtn.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-    vWrap.classList.toggle('open');
-  });
   // Close vol wrap when clicking outside
   document.addEventListener('click', function(e) {
     if (!e.target.closest('.bar-left')) vWrap.classList.remove('open');
